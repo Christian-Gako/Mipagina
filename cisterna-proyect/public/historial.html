@@ -1,0 +1,104 @@
+<!-- historial.html - VERSIÓN COMPLETA -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial - Monitoreo de Cisterna</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard">
+        <header class="header">
+            <div class="header-content">
+                <h1>🏫 Sistema de Monitoreo de Cisterna</h1>
+                <p class="subtitle">Universidad - Campus Central</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <aside class="sidebar">
+                <nav class="main-nav">
+                    <a href="index.html" class="nav-btn">📊 Dashboard</a>
+                    <a href="reportes.html" class="nav-btn">📈 Reportes</a>
+                    <a href="historial.html" class="nav-btn active">📊 Historial</a>
+                    <a href="configuracion.html" class="nav-btn">⚙️ Configuración</a>
+                </nav>
+
+                <div class="alert-panel">
+                    <h3>🔔 Alertas del Sistema</h3>
+                    <div class="alerts-list" id="alertsList">
+                        <div class="alert-item info">Cargando estado del sistema...</div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="content-area">
+                <div class="history-panel">
+                    <h2>📊 Historial de Niveles</h2>
+                    
+                    <!-- Filtros -->
+                    <div class="filters-section">
+                        <div class="filter-group">
+                            <label for="dateRange">Rango de Fechas:</label>
+                            <select id="dateRange">
+                                <option value="today">Hoy</option>
+                                <option value="yesterday">Ayer</option>
+                                <option value="week" selected>Última Semana</option>
+                                <option value="month">Último Mes</option>
+                                <option value="custom">Personalizado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group custom-dates" id="customDates" style="display: none;">
+                            <label for="startDate">Desde:</label>
+                            <input type="date" id="startDate">
+                            <label for="endDate">Hasta:</label>
+                            <input type="date" id="endDate">
+                        </div>
+                        
+                        <button class="btn btn-primary" id="applyFilters">🔍 Aplicar Filtros</button>
+                        <button class="btn btn-secondary" id="exportBtn">📥 Exportar Datos</button>
+                    </div>
+
+                    <!-- Tabla de Historial -->
+                    <div class="history-table-container">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha y Hora</th>
+                                    <th>Nivel (%)</th>
+                                    <th>Volumen (L)</th>
+                                    <th>Estado</th>
+                                    <th>Sensor ID</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <!-- Los datos se cargarán con JavaScript -->
+                                <tr>
+                                    <td colspan="5" class="loading-text">Cargando historial...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="pagination">
+                        <button class="btn btn-secondary" id="prevPage">← Anterior</button>
+                        <span class="page-info" id="pageInfo">Página 1 de 1</span>
+                        <button class="btn btn-secondary" id="nextPage">Siguiente →</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p class="university">Universidad - Departamento de Ingeniería</p>
+            <p>Sistema de Monitoreo de Cisterna v0.4</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="historial.js"></script>
+</body>
+</html>
