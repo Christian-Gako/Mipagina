@@ -1,4 +1,3 @@
-<!-- historial.html - VERSIÓN COMPLETA -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,27 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial - Monitoreo de Cisterna</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="dashboard">
         <header class="header">
             <div class="header-content">
-                <h1>🏫 Sistema de Monitoreo de Cisterna</h1>
-                <p class="subtitle">Universidad - Campus Central</p>
+                <h1>Sistema de Monitoreo</h1>
+                <p class="subtitle">TESCHA</p>
             </div>
         </header>
 
         <main class="main-content">
             <aside class="sidebar">
                 <nav class="main-nav">
-                    <a href="index.html" class="nav-btn">📊 Dashboard</a>
-                    <a href="reportes.html" class="nav-btn">📈 Reportes</a>
-                    <a href="historial.html" class="nav-btn active">📊 Historial</a>
-                    <a href="configuracion.html" class="nav-btn">⚙️ Configuración</a>
+                    <a href="index.html" class="nav-btn">
+                        <i class="fas fa-chart-bar"></i> Dashboard
+                    </a>
+                    <a href="reportes.html" class="nav-btn">
+                        <i class="fas fa-chart-line"></i> Reportes
+                    </a>
+                    <a href="historial.html" class="nav-btn active">
+                        <i class="fas fa-history"></i> Historial
+                    </a>
+                    <a href="configuracion.html" class="nav-btn">
+                        <i class="fas fa-cog"></i> Configuración
+                    </a>
                 </nav>
 
                 <div class="alert-panel">
-                    <h3>🔔 Alertas del Sistema</h3>
+                    <h3><i class="fas fa-bell"></i> Alertas del Sistema</h3>
                     <div class="alerts-list" id="alertsList">
                         <div class="alert-item info">Cargando estado del sistema...</div>
                     </div>
@@ -35,70 +43,222 @@
 
             <div class="content-area">
                 <div class="history-panel">
-                    <h2>📊 Historial de Niveles</h2>
+                    <h2><i class="fas fa-database"></i> Historial de Niveles</h2>
                     
-                    <!-- Filtros -->
+                    
                     <div class="filters-section">
                         <div class="filter-group">
                             <label for="dateRange">Rango de Fechas:</label>
-                            <select id="dateRange">
+                            <select id="dateRange" class="filter-input">
                                 <option value="today">Hoy</option>
                                 <option value="yesterday">Ayer</option>
-                                <option value="week" selected>Última Semana</option>
+                                <option value="week">Última Semana</option>
                                 <option value="month">Último Mes</option>
+                                <option value="quarter">Último Trimestre</option>
+                                <option value="year">Último Año</option>
                                 <option value="custom">Personalizado</option>
                             </select>
                         </div>
                         
                         <div class="filter-group custom-dates" id="customDates" style="display: none;">
-                            <label for="startDate">Desde:</label>
-                            <input type="date" id="startDate">
-                            <label for="endDate">Hasta:</label>
-                            <input type="date" id="endDate">
+                            <div class="date-inputs">
+                                <div class="date-input-group">
+                                    <label for="startDate">Desde:</label>
+                                    <input type="date" id="startDate" class="filter-input">
+                                </div>
+                                <div class="date-input-group">
+                                    <label for="endDate">Hasta:</label>
+                                    <input type="date" id="endDate" class="filter-input">
+                                </div>
+                            </div>
                         </div>
                         
-                        <button class="btn btn-primary" id="applyFilters">🔍 Aplicar Filtros</button>
-                        <button class="btn btn-secondary" id="exportBtn">📥 Exportar Datos</button>
+                        <div class="filter-group">
+                            <label for="sensorFilter">Sensor:</label>
+                            <select id="sensorFilter" class="filter-input">
+                                <option value="">Todos los sensores</option>
+                                <option value="CAP-SENS-001">CAP-SENS-001</option>
+                                <option value="RESV-SENS-001">RESV-SENS-001</option>
+                                <option value="TANQ-SENS-001">TANQ-SENS-001</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="statusFilter">Estado:</label>
+                            <select id="statusFilter" class="filter-input">
+                                <option value="">Todos los estados</option>
+                                <option value="Normal">Normal</option>
+                                <option value="Advertencia">Advertencia</option>
+                                <option value="Crítico">Crítico</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="itemsPerPage">Registros por página:</label>
+                            <select id="itemsPerPage" class="filter-input">
+                                <option value="10">10</option>
+                                <option value="20" selected>20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="250">250</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-buttons">
+                            <button class="btn btn-primary" id="applyFilters">
+                                <i class="fas fa-filter"></i> Aplicar Filtros
+                            </button>
+                            <button class="btn btn-info" id="exportBtn">
+                                <i class="fas fa-file-export"></i> Exportar Datos
+                            </button>
+                            <button class="btn btn-secondary" id="clearFilters">
+                                <i class="fas fa-redo"></i> Limpiar
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Tabla de Historial -->
+                    <!-- Tabla de Historial Mejorada -->
                     <div class="history-table-container">
                         <table class="history-table">
                             <thead>
                                 <tr>
-                                    <th>Fecha y Hora</th>
-                                    <th>Nivel (%)</th>
-                                    <th>Volumen (L)</th>
-                                    <th>Estado</th>
-                                    <th>Sensor ID</th>
+                                    <th onclick="sortTable('timestamp')">
+                                        Fecha y Hora 
+                                        <i class="fas fa-sort" id="sortTimestamp"></i>
+                                    </th>
+                                    <th onclick="sortTable('sensor')">
+                                        Sensor
+                                        <i class="fas fa-sort" id="sortSensor"></i>
+                                    </th>
+                                    <th onclick="sortTable('nivel')">
+                                        Nivel 
+                                        <i class="fas fa-sort" id="sortNivel"></i>
+                                    </th>
+                                    <th onclick="sortTable('volumen')">
+                                        Volumen (L) 
+                                        <i class="fas fa-sort" id="sortVolumen"></i>
+                                    </th>
+                                    <th onclick="sortTable('estado')">
+                                        Estado 
+                                        <i class="fas fa-sort" id="sortEstado"></i>
+                                    </th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="historyTableBody">
-                                <!-- Los datos se cargarán con JavaScript -->
                                 <tr>
-                                    <td colspan="5" class="loading-text">Cargando historial...</td>
+                                    <td colspan="6" class="loading-text">
+                                        <i class="fas fa-spinner fa-spin"></i> Cargando historial...
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- Paginación -->
-                    <div class="pagination">
-                        <button class="btn btn-secondary" id="prevPage">← Anterior</button>
-                        <span class="page-info" id="pageInfo">Página 1 de 1</span>
-                        <button class="btn btn-secondary" id="nextPage">Siguiente →</button>
+                    <!-- Información y Paginación Mejorada -->
+                    <div class="table-footer">
+                        <div class="results-info" id="resultsInfo">
+                            Mostrando 0 de 0 registros
+                        </div>
+                        <div class="pagination">
+                            <button class="btn btn-secondary" id="firstPage" disabled>
+                                <i class="fas fa-angle-double-left"></i>
+                            </button>
+                            <button class="btn btn-secondary" id="prevPage" disabled>
+                                <i class="fas fa-chevron-left"></i> Anterior
+                            </button>
+                            <span class="page-info" id="pageInfo">Página 1 de 1</span>
+                            <button class="btn btn-secondary" id="nextPage" disabled>
+                                Siguiente <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <button class="btn btn-secondary" id="lastPage" disabled>
+                                <i class="fas fa-angle-double-right"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
 
         <footer class="footer">
-            <p class="university">Universidad - Departamento de Ingeniería</p>
+            <p class="university">Tecnológico de Estudios Superiores de Chalco</p>
             <p>Sistema de Monitoreo de Cisterna v0.4</p>
         </footer>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Modal para Exportar -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-export"></i> Exportar Datos</h3>
+                <span class="close-btn" id="closeExportModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="exportFormat">Formato: </label>
+                    <select id="exportFormat" class="filter-input">
+                        <option value="csv">CSV (Excel compatible)</option>
+                        <option value="json">JSON</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="exportColumns">Columnas a incluir:</label>
+                    <div class="columns-checkboxes">
+                        <!-- Eliminamos los checkbox-row y ponemos todo directo -->
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="exportColumn" value="timestamp" checked>
+                            <span>Fecha y Hora</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="exportColumn" value="sensor" checked>
+                            <span>Sensor ID</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="exportColumn" value="nivel" checked>
+                            <span>Nivel (%)</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="exportColumn" value="volumen" checked>
+                            <span>Volumen (L)</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="exportColumn" value="estado" checked>
+                            <span>Estado</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="exportColumn" value="ubicacion" checked>
+                            <span>Ubicación</span>
+                        </label>
+                    </div>
+                </div>
+                
+               <div class="form-group-range">
+                <label class="checkbox-all-data">
+                    <input type="checkbox" id="exportAllData" name="exportAllData">
+                    <span>Incluir todos los datos del sistema (no solo los filtrados)</span>
+                </label>
+                <p class="range-note">
+                    <small>Por defecto se exportan solo los datos filtrados actualmente</small>
+                </p>
+            </div>
+                
+                <div class="export-preview">
+                    <p><i class="fas fa-info-circle"></i> Se exportarán aproximadamente <span id="exportCount">0</span> registros.</p>
+                    <p class="note"><small>Nota: Los datos se descargarán automáticamente en su dispositivo.</small></p>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelExport">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="btn btn-primary" id="confirmExport">
+                    <i class="fas fa-download"></i> Descargar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="historial.js"></script>
 </body>
 </html>

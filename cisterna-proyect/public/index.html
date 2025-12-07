@@ -5,167 +5,164 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Sistema de Monitoreo</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="dashboard">
-        <!-- Header Centrado -->
         <header class="header">
             <div class="header-content">
-                <h1>🏫 Sistema de Monitoreo de Cisterna</h1>
-                <p class="subtitle">Universidad - Campus Central</p>
+                <h1>Sistema de Monitoreo</h1>
+                <p class="subtitle">TESCHA</p>
             </div>
         </header>
 
-        <!-- Contenido Principal -->
         <main class="main-content">
-            <!-- Panel Lateral con Navegación -->
             <aside class="sidebar">
                 <nav class="main-nav">
                     <a href="index.html" class="nav-btn active">
-                        📊 Dashboard
+                        <i class="fas fa-chart-bar"></i> Dashboard
                     </a>
                     <a href="reportes.html" class="nav-btn">
-                        📈 Reportes
+                        <i class="fas fa-chart-line"></i> Reportes
                     </a>
-	            <a href="historial.html" class="nav-btn">
-                        📊 Historial
+                    <a href="historial.html" class="nav-btn">
+                        <i class="fas fa-history"></i> Historial
                     </a>
                     <a href="configuracion.html" class="nav-btn">
-                        ⚙️ Configuración
+                        <i class="fas fa-cog"></i> Configuración
                     </a>
                 </nav>
 
-                <!-- Panel de Alertas -->
                 <div class="alert-panel">
-                    <h3>🔔 Alertas del Sistema</h3>
+                    <h3><i class="fas fa-bell"></i> Alertas del Sistema</h3>
                     <div class="alerts-list" id="alertsList">
                         <div class="alert-item info">
-                            ✅ Sistema funcionando normalmente
+                            Cargando estado del sistema...
                         </div>
                     </div>
                 </div>
             </aside>
 
-            <!-- Área de Contenido Principal -->
-            <div class="content-area">
-                <!-- Sección Superior: Tanque y Estadísticas -->
-                <div class="top-section">
-                    <div class="tank-container">
-                        <h2>Estado Actual del Nivel</h2>
-                        <div class="tank-wrapper">
-                            <div class="tank">
-                                <div class="water" id="waterLevel"></div>
-                                <div class="water-percentage" id="waterPercentage">48%</div>
-                            </div>
-                        </div>
-                    </div>
+                            <!-- Área de Contenido Principal -->
+                            <div class="content-area">
+                                <!-- Sección Superior: Tanque y Estadísticas -->
+                                <div class="top-section">
+                                    <div class="tank-container">
+                                        <h2>Estado Actual</h2>
+                                        <div class="tank-wrapper">
+                                            <div class="tank">
+                                                <div class="water" id="waterLevel"></div>
+                                                <div class="water-percentage" id="waterPercentage">48%</div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                    <!-- Estadísticas -->
-                    <div class="stats-container">
-                        <div class="stats-grid">
-                            <div class="stat-card wide">
-                                <div class="stat-icon">🕒</div>
-                                <div class="stat-info">
-                                    <span class="stat-value" id="lastUpdate">9:47:05 a.m.</span>
-                                    <span class="stat-label">Última Actualización</span>
+                                    <!-- Estadísticas -->
+                                    <div class="stats-container">
+                                        <div class="stats-grid">
+                                            <div class="stat-card wide">
+                                                <div class="stat-icon">🕒</div>
+                                                <div class="stat-info">
+                                                    <span class="stat-value" id="lastUpdate">9:47:05 a.m.</span>
+                                                    <span class="stat-label">Última Actualización</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="stat-card wide">
+                                                <div class="stat-icon">⚠️</div>
+                                                <div class="stat-info">
+                                                    <span class="stat-value" id="status">Normal</span>
+                                                    <span class="stat-label">Estado del Sistema</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="stat-card wide">
-                                <div class="stat-icon">⚠️</div>
-                                <div class="stat-info">
-                                    <span class="stat-value" id="status">Normal</span>
-                                    <span class="stat-label">Estado del Sistema</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Sección Inferior: Información del Sistema -->
-                <div class="info-section">
-                    <h2 class="section-title">📋 Información del Sistema</h2>
-                    <div class="info-grid-compact">
-                        <!-- Columna 1: Datos de la Cisterna -->
+                                <!-- Sección Inferior: Información del Sistema -->
+                                <div class="info-section">
+                                    <h2 class="section-title">Información del Sistema</h2>
+                                    <div class="info-grid-compact">
+                                        <!-- Columna 1: Datos de la Cisterna -->
+                                        <div class="info-column">
+                                            <div class="info-group">
+                                                <h3>🏗️ Datos de la Cisterna</h3>
+                                <div class="info-item-compact">
+                                        <span class="info-label">Nombre:</span>
+                                        <span class="info-value" id="config-cisternaNombre">...</span>
+                                </div>
+                                <div class="info-item-compact">
+                                    <span class="info-label">Capacidad:</span>
+                                    <span class="info-value" id="config-cisternaCapacidad">...</span>
+                                </div>
+                                <div class="info-item-compact">
+                                    <span class="info-label">Ubicación:</span>
+                                    <span class="info-value" id="config-cisternaUbicacion">...</span>
+                                </div>
+                                <div class="info-item-compact">
+                                    <span class="info-label">Material:</span>
+                                    <span class="info-value" id="config-cisternaMaterial">...</span>
+                                </div>                                
+                           </div>
+                        </div>
+
+                                <!-- Columna 2: Datos del Sensor -->
                         <div class="info-column">
                             <div class="info-group">
-                                <h3>🏗️ Datos de la Cisterna</h3>
-				<div class="info-item-compact">
-    					<span class="info-label">Nombre:</span>
-				        <span class="info-value" id="config-cisternaNombre">Cisterna - Sorluana</span>
-				</div>
-				<div class="info-item-compact">
-				    <span class="info-label">Capacidad:</span>
-				    <span class="info-value" id="config-cisternaCapacidad">10,000 litros</span>
-				</div>
-				<div class="info-item-compact">
-				    <span class="info-label">Ubicación:</span>
-				    <span class="info-value" id="config-cisternaUbicacion">Edificio G - Sor Juana</span>
-				</div>
-				<div class="info-item-compact">
-				    <span class="info-label">Material:</span>
-				    <span class="info-value" id="config-cisternaMaterial">Concreto armado</span>
-				</div>                                
+                                <h3>📡 Datos del Sensor</h3>
+                                <div class="info-item-compact">
+                                        <span class="info-label">Modelo:</span>
+                                    <span class="info-value" id="config-sensorModelo">...</span>
+                                </div>
+                                <div class="info-item-compact">
+                                    <span class="info-label">ID del Sensor:</span>
+                                    <span class="info-value" id="config-sensorID">...</span>
+                                </div>
+                                <div class="info-item-compact">
+                                    <span class="info-label">Instalación:</span>
+                                    <span class="info-value" id="config-sensorInstalacion">...</span>
+                                </div>
+                                <div class="info-item-compact">
+                                    <span class="info-label">Precisión:</span>
+                                    <span class="info-value" id="config-sensorPrecision">...</span>
+                                </div>
                             </div>
                         </div>
 
-                <!-- Columna 2: Datos del Sensor -->
-		<div class="info-column">
-		    <div class="info-group">
-		        <h3>📡 Datos del Sensor</h3>
-		        <div class="info-item-compact">
-	    	            <span class="info-label">Modelo:</span>
-		            <span class="info-value" id="config-sensorModelo">Sensor Capacitivo XYZ-2000</span>
-		        </div>
-		        <div class="info-item-compact">
-		            <span class="info-label">ID del Sensor:</span>
-		            <span class="info-value" id="config-sensorID">CAP-SENS-001</span>
-		        </div>
-		        <div class="info-item-compact">
-		            <span class="info-label">Instalación:</span>
-		            <span class="info-value" id="config-sensorInstalacion">15/Oct/2024</span>
-		        </div>
-		        <div class="info-item-compact">
-		            <span class="info-label">Precisión:</span>
-		            <span class="info-value" id="config-sensorPrecision">±2%</span>
-		        </div>
-		    </div>
-		</div>
-
                         <!-- Columna 3: Configuración del Sistema -->
-<div class="info-column">
-    <div class="info-group">
-        <h3>🌐 Configuración del Sistema</h3>
-        <div class="info-item-compact">
-            <span class="info-label">Frecuencia de Muestreo:</span>
-            <span class="info-value" id="config-frecuenciaMuestreo">Cada 10 segundos</span>
-        </div>
-        <div class="info-item-compact">
-            <span class="info-label">Base de Datos:</span>
-            <span class="info-value" id="config-database-type">MongoDB Atlas</span>
-        </div>
-        <div class="info-item-compact">
-            <span class="info-label">Plataforma IoT:</span>
-            <span class="info-value" id="config-iot-platform">Ubidots</span>
-        </div>
-        <div class="info-item-compact">
-            <span class="info-label">Versión del Sistema:</span>
-            <span class="info-value" id="config-system-version">v0.4</span>
-        </div>
-    </div>
-</div>
+                        <div class="info-column">
+                            <div class="info-group">
+                                <h3>🌐 Configuración del Sistema</h3>
+                                <div class="info-item-compact">
+                                    <span class="info-label">Frecuencia de Muestreo:</span>
+                                    <span class="info-value" id="config-frecuenciaMuestreo">...</span>
+                                </div>
+                                <div class="info-item-compact">
+                                    <span class="info-label">Base de Datos:</span>
+                                    <span class="info-value" id="config-database-type">...</span>
+                                </div>
+                                <div class="info-item-compact">
+                                    <span class="info-label">Plataforma IoT:</span>
+                                    <span class="info-value" id="config-iot-platform">...</span>
+                                </div>
+                                <div class="info-item-compact">
+                                    <span class="info-label">Versión del Sistema:</span>
+                                    <span class="info-value" id="config-system-version">...</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
 
     
-<footer class="footer">
-    <p class="university">Universidad - Departamento de Ingeniería</p>
-    <p>Sistema de Monitoreo de Cisterna v0.4</p>
-</footer>
-    </div>
+        <footer class="footer">
+            <p class="university">Tecnológico de Estudios Superiores de Chalco</p>
+            <p>Sistema de Monitoreo v0.4</p>
+        </footer>
+            </div>
 
-    <script src="script.js"></script>
-</body>
+            <script src="script.js"></script>
+    </body>
 </html>

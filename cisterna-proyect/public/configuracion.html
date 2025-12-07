@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configuración - Monitoreo de Cisterna</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="dashboard">
         <header class="header">
             <div class="header-content">
-                <h1>🏫 Sistema de Monitoreo de Cisterna</h1>
-                <p class="subtitle">Universidad - Campus Central</p>
+                <h1>Sistema de Monitoreo</h1>
+                <p class="subtitle">TESCHA</p>
             </div>
         </header>
 
@@ -19,32 +20,30 @@
             <aside class="sidebar">
                 <nav class="main-nav">
                     <a href="index.html" class="nav-btn">
-                        📊 Dashboard
+                        <i class="fas fa-chart-bar"></i> Dashboard
                     </a>
                     <a href="reportes.html" class="nav-btn">
-                        📈 Reportes
+                        <i class="fas fa-chart-line"></i> Reportes
                     </a>
-		    <a href="historial.html" class="nav-btn">
-                        📊 Historial
+                    <a href="historial.html" class="nav-btn">
+                        <i class="fas fa-history"></i> Historial
                     </a>
                     <a href="configuracion.html" class="nav-btn active">
-                        ⚙️ Configuración
+                        <i class="fas fa-cog"></i> Configuración
                     </a>
                 </nav>
 
                 <div class="alert-panel">
-                    <h3>🔔 Alertas del Sistema</h3>
+                    <h3><i class="fas fa-bell"></i> Alertas del Sistema</h3>
                     <div class="alerts-list" id="alertsList">
-                        <div class="alert-item info">
-                            Cargando estado del sistema...
-                        </div>
+                        <div class="alert-item info">Cargando estado del sistema...</div>
                     </div>
                 </div>
             </aside>
 
             <div class="content-area">
                 <div class="config-panel">
-                    <h2>⚙️ Configuración del Sistema</h2>
+                    <h2>Configuración del Sistema</h2>
                     
                     <!-- Formulario de Configuración -->
                     <form id="configForm" class="config-form">
@@ -53,7 +52,7 @@
                             <h3>🏗️ Datos de la Cisterna</h3>
                             <div class="form-group">
                                 <label for="cisternaNombre">Nombre:</label>
-                                <input type="text" id="cisternaNombre" name="cisternaNombre" value="Cisterna - Sorluana">
+                                <input type="text" id="cisternaNombre" name="cisternaNombre" value="Cisterna - Sor Juana">
                             </div>
                             <div class="form-group">
                                 <label for="cisternaCapacidad">Capacidad (litros):</label>
@@ -140,7 +139,7 @@
         </main>
 
         <footer class="footer">
-             <p class="university">Universidad - Departamento de Ingeniería</p>
+             <p class="university">Tecnológico de Estudios Superiores de Chalco</p>
 	     <p>Sistema de Monitoreo de Cisterna v0.4</p>
         </footer>
     </div>

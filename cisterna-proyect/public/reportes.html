@@ -1,45 +1,55 @@
-<!-- reportes.html - VERSIÓN COMPLETA -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reportes - Monitoreo de Cisterna</title>
+    <title>Monitoreo de Cisterna</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="dashboard">
         <header class="header">
             <div class="header-content">
-                <h1>🏫 Sistema de Monitoreo de Cisterna</h1>
-                <p class="subtitle">Universidad - Campus Central</p>
+                <h1>Sistema de Monitoreo</h1>
+                <p class="subtitle">TESCHA</p>
             </div>
         </header>
 
         <main class="main-content">
             <aside class="sidebar">
                 <nav class="main-nav">
-                    <a href="index.html" class="nav-btn">📊 Dashboard</a>
-                    <a href="reportes.html" class="nav-btn active">📈 Reportes</a>
-                    <a href="historial.html" class="nav-btn">📊 Historial</a>
-                    <a href="configuracion.html" class="nav-btn">⚙️ Configuración</a>
+                    <a href="index.html" class="nav-btn">
+                        <i class="fas fa-chart-bar"></i> Dashboard
+                    </a>
+                    <a href="reportes.html" class="nav-btn active">
+                        <i class="fas fa-chart-line"></i> Reportes
+                    </a>
+                    <a href="historial.html" class="nav-btn">
+                        <i class="fas fa-history"></i> Historial
+                    </a>
+                    <a href="configuracion.html" class="nav-btn">
+                        <i class="fas fa-cog"></i> Configuración
+                    </a>
                 </nav>
 
                 <div class="alert-panel">
-                    <h3>🔔 Alertas del Sistema</h3>
+                    <h3><i class="fas fa-bell"></i> Alertas del Sistema</h3>
                     <div class="alerts-list" id="alertsList">
-                        <div class="alert-item info">Cargando estado del sistema...</div>
+                        <div class="alert-item info">
+                            Cargando estado del sistema...
+                        </div>
                     </div>
                 </div>
             </aside>
 
             <div class="content-area">
                 <div class="reports-panel">
-                    <h2>📈 Reportes y Análisis</h2>
+                    <h2>Reportes y Análisis</h2>
                     
                     <!-- Selector de Tipo de Reporte -->
                     <div class="report-type-selector">
-                        <h3>Selecciona el Tipo de Reporte</h3>
+                        <h3>Selecciona el tipo de Reporte</h3>
                         <div class="report-cards">
                             <div class="report-card" data-report="daily">
                                 <div class="report-icon">📅</div>
@@ -84,7 +94,7 @@
                                     <option value="night">Turno noche (22:00-6:00)</option>
                                 </select>
                             </div>
-                            <button class="btn btn-primary" id="generateReport">🔄 Generar Reporte</button>
+                            <button class="btn btn-primary" id="generateReport">Generar Reporte</button>
                         </div>
                     </div>
 
@@ -121,7 +131,7 @@
         </main>
 
         <footer class="footer">
-            <p class="university">Universidad - Departamento de Ingeniería</p>
+            <p class="university">Tecnológico de Estudios Superiores de Chalco</p>
             <p>Sistema de Monitoreo de Cisterna v0.4</p>
         </footer>
     </div>

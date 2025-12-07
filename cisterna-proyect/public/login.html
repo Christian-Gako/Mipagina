@@ -1,14 +1,14 @@
-<!-- login.html -->
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistema de Monitoreo</title>
+    <title>Login</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .login-container {
-            min-height: 100vh;
+            min-height: 90vh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -22,7 +22,7 @@
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             text-align: center;
         }
         
@@ -34,11 +34,12 @@
         .login-title {
             color: var(--primary-color);
             margin-bottom: 10px;
-            font-size: 1.8em;
+            font-size: 1.9em;
         }
         
         .login-subtitle {
             color: #666;
+            font-weight: 500;
             margin-bottom: 30px;
         }
         
@@ -56,8 +57,9 @@
         
         .login-form input {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e9ecef;
+            padding: 12px 14px;
+            text-align: center;
+            border: 3px solid #e9ecef;
             border-radius: 8px;
             font-size: 1em;
             transition: all 0.3s ease;
@@ -106,7 +108,7 @@
         <div class="login-card">
             <div class="login-logo">🏫</div>
             <h1 class="login-title">Sistema de Monitoreo</h1>
-            <p class="login-subtitle">Universidad - Campus Central</p>
+            <p class="login-subtitle">Tecnológico de Estudios Superiores de Chalco</p>
             
             <form class="login-form" id="loginForm">
                 <div class="form-group">
@@ -119,7 +121,7 @@
                     <input type="password" id="password" placeholder="Ingresa tu contraseña" required>
                 </div>
                 
-                <button type="submit" class="login-btn">🔐 Iniciar Sesión</button>
+                <button type="submit" class="login-btn">Iniciar Sesión</button>
             </form>
         </div>
     </div>
