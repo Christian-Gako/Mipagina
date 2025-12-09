@@ -786,51 +786,32 @@ app.post('/api/esp32/data', async (req, res) => {
   try {
     console.log('📡 ESP32 REAL enviando:', req.body);
     
-    // Validar
-    const { dispositivo, distancia_cm } = req.body;
-    if (!dispositivo || distancia_cm === undefined) {
-      return res.json({ 
-        success: false, 
-        error: 'Se requieren: dispositivo, distancia_cm' 
-      });
+    const { dispositivo, porcentaje } = req.body;
+    
+    if (!dispositivo || porcentaje === undefined) {
+      return res.json({ success: false, error: 'Faltan datos' });
     }
     
-
-    if (!MONGODB_URI) {
-      return res.json({
-        success: true,
-        message: 'Datos recibidos (MongoDB no configurado)',
-        data: req.body
-      });
-    }
+    // Usar el modelo WaterLevel existente
+    const nuevoRegistro = new WaterLevel({
+      sensor: dispositivo,      // 'sensor' en el modelo
+      value: parseFloat(porcentaje),  // 'value' en el modelo
+      // ubicacion y estado se calculan automáticamente por el middleware
+    });
     
-    const client = new MongoClient(MONGODB_URI);
-    await client.connect();
-    
-    const db = client.db('cisterna_db');
-    const collection = db.collection('esp32_real_data'); // Colección separada
-    
-    const doc = {
-      dispositivo: dispositivo,
-      distancia_cm: parseFloat(distancia_cm),
-      porcentaje: req.body.porcentaje ? parseFloat(req.body.porcentaje) : null,
-      litros: req.body.litros ? parseFloat(req.body.litros) : null,
-      timestamp: new Date(),
-      source: 'esp32_real',
-      rssi: req.body.rssi || null
-    };
-    
-    const result = await collection.insertOne(doc);
-    await client.close();
-    
-    console.log('✅ ESP32 real guardado, ID:', result.insertedId);
+    await nuevoRegistro.save();
     
     res.json({
       success: true,
-      insertedId: result.insertedId,
-      message: 'Datos ESP32 guardados'
+      message: 'Guardado en waterlevels',
+      data: {
+        sensor: nuevoRegistro.sensor,
+        value: nuevoRegistro.value,
+        volumen: nuevoRegistro.volumen,
+        estado: nuevoRegistro.estado,
+        ubicacion: nuevoRegistro.ubicacion
+      }
     });
-    
   } catch (error) {
     console.error('❌ Error ESP32:', error);
     res.json({
@@ -858,6 +839,7 @@ async function iniciarServidor() {
 
 
 iniciarServidor();
+
 
 
 
