@@ -795,9 +795,7 @@ app.post('/api/esp32/data', async (req, res) => {
       });
     }
     
-    // Usar MongoClient (no mongoose) para simplicidad
-    const MONGODB_URI = process.env.MONGODB_URI;
-    
+
     if (!MONGODB_URI) {
       return res.json({
         success: true,
@@ -860,6 +858,7 @@ async function iniciarServidor() {
 
 
 iniciarServidor();
+
 
 
 
