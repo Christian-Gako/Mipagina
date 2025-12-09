@@ -782,31 +782,59 @@ app.get('/test', (req, res) => {
 
 
 
-app.post('/api/data', async (req, res) => {
+app.post('/api/esp32/data', async (req, res) => {
   try {
-    // 1. Guardar en MongoDB
+    console.log('📡 ESP32 REAL enviando:', req.body);
+    
+    // Validar
+    const { dispositivo, distancia_cm } = req.body;
+    if (!dispositivo || distancia_cm === undefined) {
+      return res.json({ 
+        success: false, 
+        error: 'Se requieren: dispositivo, distancia_cm' 
+      });
+    }
+    
+    // Usar MongoClient (no mongoose) para simplicidad
+    const MONGODB_URI = process.env.MONGODB_URI;
+    
+    if (!MONGODB_URI) {
+      return res.json({
+        success: true,
+        message: 'Datos recibidos (MongoDB no configurado)',
+        data: req.body
+      });
+    }
+    
     const client = new MongoClient(MONGODB_URI);
     await client.connect();
     
     const db = client.db('cisterna_db');
-    const collection = db.collection('waterlevels');
+    const collection = db.collection('esp32_real_data'); // Colección separada
     
-    const document = {
-      ...req.body,
-      timestamp: new Date()
+    const doc = {
+      dispositivo: dispositivo,
+      distancia_cm: parseFloat(distancia_cm),
+      porcentaje: req.body.porcentaje ? parseFloat(req.body.porcentaje) : null,
+      litros: req.body.litros ? parseFloat(req.body.litros) : null,
+      timestamp: new Date(),
+      source: 'esp32_real',
+      rssi: req.body.rssi || null
     };
     
-    const result = await collection.insertOne(document);
+    const result = await collection.insertOne(doc);
     await client.close();
     
-    // 2. Responder
+    console.log('✅ ESP32 real guardado, ID:', result.insertedId);
+    
     res.json({
       success: true,
       insertedId: result.insertedId,
-      message: 'Guardado en MongoDB'
+      message: 'Datos ESP32 guardados'
     });
     
   } catch (error) {
+    console.error('❌ Error ESP32:', error);
     res.json({
       success: false,
       error: error.message
@@ -832,5 +860,6 @@ async function iniciarServidor() {
 
 
 iniciarServidor();
+
 
 
