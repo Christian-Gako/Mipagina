@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
-
+// URI de MongoDB (configura como variable en Render)
+const MONGODB_URI = process.env.MONGODB_URI;
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
 
@@ -34,8 +35,6 @@ app.get('/configuracion', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'configuracion.html'));
 });
 
-// CONEXIÓN A MONGODB
-const MONGODB_URI = 'mongodb+srv://ChristianCG:Gako0719caLAbi@cluster0.mwretdh.mongodb.net/cisterna_db?retryWrites=true&w=majority';
 
 console.log('🔗 Conectando a MongoDB Atlas...');
 
@@ -192,7 +191,7 @@ let configuracionActual = {
     sensorID: '...',
     sensorInstalacion: '...',
     sensorPrecision: '±...%',
-    frecuenciaMuestreo: 10003,
+    frecuenciaMuestreo: 10000,
     umbralAlerta: 15,
     umbralCritico: 5
 };
@@ -556,7 +555,7 @@ app.post('/api/simular/sensor', async (req, res) => {
             sensor: sensor,
             value: parseFloat(value)
         });
-        
+        /*
         await nuevoRegistro.save();
         
         res.json({ 
@@ -569,7 +568,7 @@ app.post('/api/simular/sensor', async (req, res) => {
                 estado: nuevoRegistro.estado,
                 ubicacion: nuevoRegistro.ubicacion
             }
-        });
+        });*/
         
     } catch (error) {
         console.error('❌ Error en simulación:', error);
@@ -781,8 +780,7 @@ app.get('/test', (req, res) => {
     });
 });
 
-// URI de MongoDB (configura como variable en Render)
-MONGODB_URI = process.env.MONGODB_URI;
+
 
 app.post('/api/data', async (req, res) => {
   try {
@@ -834,3 +832,4 @@ async function iniciarServidor() {
 
 
 iniciarServidor();
+
