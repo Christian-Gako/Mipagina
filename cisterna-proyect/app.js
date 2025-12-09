@@ -346,7 +346,7 @@ app.post('/api/servidor/reiniciar', async (req, res) => {
         }
         
         await cargarConfiguracionInicial();
-        iniciarMuestreo();
+        //iniciarMuestreo();
         
         res.json({ 
             success: true, 
@@ -821,7 +821,7 @@ app.post('/api/data', async (req, res) => {
 
 async function iniciarServidor() {
     await cargarConfiguracionInicial();
-    iniciarMuestreo();
+   // iniciarMuestreo();
     
     app.listen(port, () => {
         console.log(`\n🚀 Servidor en http://localhost:${port}`);
@@ -832,4 +832,5 @@ async function iniciarServidor() {
 
 
 iniciarServidor();
+
 
