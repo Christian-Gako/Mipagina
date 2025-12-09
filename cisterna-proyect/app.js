@@ -781,36 +781,41 @@ app.get('/test', (req, res) => {
     });
 });
 
+// URI de MongoDB (configura como variable en Render)
+MONGODB_URI = process.env.MONGODB_URI;
+
 app.post('/api/data', async (req, res) => {
   try {
-    if (!client) {
-      await connectDB();
-    }
+    // 1. Guardar en MongoDB
+    const client = new MongoClient(MONGODB_URI);
+    await client.connect();
     
-    const db = client.db("cisterna_db");
-    const collection = db.collection("waterlevels");
+    const db = client.db('cisterna_db');
+    const collection = db.collection('waterlevels');
     
-    const data = {
+    const document = {
       ...req.body,
-      timestamp: new Date(),
+      timestamp: new Date()
     };
     
-    const result = await collection.insertOne(data);
+    const result = await collection.insertOne(document);
+    await client.close();
     
+    // 2. Responder
     res.json({
       success: true,
-      message: "Datos guardados en cisterna_db.waterlevels",
       insertedId: result.insertedId,
-      timestamp: data.timestamp
+      message: 'Guardado en MongoDB'
     });
     
   } catch (error) {
-    res.status(500).json({
+    res.json({
       success: false,
       error: error.message
     });
   }
 });
+
 
 // ============================================
 // INICIALIZACIÓN
@@ -826,5 +831,6 @@ async function iniciarServidor() {
 
     });
 }
+
 
 iniciarServidor();
