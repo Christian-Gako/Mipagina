@@ -69,10 +69,10 @@
                     showAlert(' Autenticación exitosa. Redirigiendo...', 'success');
                     
                     // Guardar datos de sesión
-                    sessionStorage.setItem('authToken', data.token);
-                    sessionStorage.setItem('userData', JSON.stringify(data.user));
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('userData', JSON.stringify(data.user));
 
-                    sessionStorage.setItem('lastLogin', new Date().toISOString());
+                    localStorage.setItem('lastLogin', new Date().toISOString());
                     console.log("token: ",data.token);
                     
                     // Registrar login exitoso
@@ -143,13 +143,13 @@
 
         // Verificar si ya hay sesión activa
         function checkExistingSession() {
-            const token = sessionStorage.getItem('authToken');
-            const userData = sessionStorage.getItem('userData');
+            const token = localStorage.getItem('authToken');
+            const userData = localStorage.getItem('userData');
             
             if (token && userData) {
                 try {
                     const user = JSON.parse(userData);
-                    const lastLogin = sessionStorage.getItem('lastLogin');
+                    const lastLogin = localStorage.getItem('lastLogin');
                     const hoursSinceLogin = lastLogin ? 
                         (new Date() - new Date(lastLogin)) / (1000 * 60 * 60) : 24;
                     
@@ -159,13 +159,13 @@
                         window.location.href = 'index.html';
                     } else {
                         // Sesión expirada, limpiar
-                        sessionStorage.removeItem('authToken');
-                        sessionStorage.removeItem('userData');
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('userData');
                         showAlert('Sesión expirada. Por favor, inicie sesión nuevamente.', 'error');
                     }
                 } catch (e) {
                     // Datos corruptos, limpiar
-                    sessionStorage.clear();
+                    localStorage.clear();
                 }
             }
         }
