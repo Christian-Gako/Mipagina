@@ -3,8 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+<<<<<<< HEAD
   "scripts": {
     "start": "node app.js"
+=======
+  "scripts": {  
+    "start" : "node app.js"
+>>>>>>> 631890a5915660993cdb9a14c3dbec4af5971764
   },
   "keywords": [],
   "author": "",
