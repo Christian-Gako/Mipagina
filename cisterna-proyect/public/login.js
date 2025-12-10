@@ -7,7 +7,6 @@
         const btnText = document.getElementById('btnText');
         const btnLoader = document.getElementById('btnLoader');
         const alertMessage = document.getElementById('alertMessage');
-        const serverStatus = document.getElementById('serverStatus');
         const togglePassword = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
 
@@ -18,13 +17,7 @@
             this.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
         });
 
-        // Verificar estado del servidor al cargar
-        window.addEventListener('load', async () => {
-            const isOnline = await checkServerStatus();
-            if (!isOnline) {
-                showServerStatus('Servidor no disponible. Contacte al administrador.', 'offline');
-            }
-        });
+    
 
         // Manejar login
         loginForm.addEventListener('submit', async function(e) {
@@ -55,6 +48,7 @@
             
             try {
                 // Intentar autenticación con el servidor
+                console.log("given: ",username, " and ",password);
                 const response = await fetch(`${API_URL}/auth/login`, {
                     method: 'POST',
                     headers: {
@@ -78,6 +72,7 @@
                     localStorage.setItem('authToken', data.token);
                     localStorage.setItem('userData', JSON.stringify(data.user));
                     localStorage.setItem('lastLogin', new Date().toISOString());
+                    console.log("token: ",data.token);
                     
                     // Registrar login exitoso
                     console.log(`Login exitoso: ${data.user.username} (${data.user.role})`);
@@ -90,8 +85,8 @@
                 } else {
                     // Login fallido
                     const errorMsg = data.error || 'Credenciales incorrectas';
+                    console.log(`Intento fallido de login: ${username} , ${password}`);
                     showAlert(` ${errorMsg}`, 'error');
-                    passwordInput.value = '';
                     passwordInput.focus();
                     
                     // Registrar intento fallido
@@ -130,15 +125,6 @@
             }, hideTime);
         }
 
-        function showServerStatus(message, status = 'online') {
-            serverStatus.textContent = message;
-            serverStatus.className = `server-status server-${status}`;
-            serverStatus.style.display = 'flex';
-            serverStatus.innerHTML = `
-                <span class="server-icon">${status === 'online' ? '✅' : '❌'}</span>
-                ${message}
-            `;
-        }
 
         function setLoading(isLoading) {
             if (isLoading) {
@@ -152,21 +138,7 @@
             }
         }
 
-        async function checkServerStatus() {
-            try {
-                const response = await fetch(`${API_URL}/system/info`, {
-                    signal: AbortSignal.timeout(5000)
-                });
-                
-                if (response.ok) {
-                    showServerStatus('Servidor conectado', 'online');
-                    return true;
-                }
-                return false;
-            } catch (error) {
-                return false;
-            }
-        }
+    
 
         // Verificar si ya hay sesión activa
         function checkExistingSession() {

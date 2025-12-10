@@ -52,7 +52,7 @@ router.post('/login', async (req, res) => {
                 role: user.role,
                 name: user.name
             },
-            process.env.JWT_SECRET || 'simona-jwt-secreto-tesco-2024',
+            process.env.JWT_SECRET,
             { expiresIn: '8h' }
         );
         
@@ -93,7 +93,7 @@ const authenticateToken = (req, res, next) => {
         });
     }
     
-    jwt.verify(token, process.env.JWT_SECRET || 'simona-jwt-secreto-tesco-2024', (err, user) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) {
             return res.status(403).json({ 
                 success: false, 
@@ -142,7 +142,7 @@ router.post('/verify', (req, res) => {
         });
     }
     
-    jwt.verify(token, process.env.JWT_SECRET || 'simona-jwt-secreto-tesco-2024', (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) {
             return res.json({ 
                 success: false, 
