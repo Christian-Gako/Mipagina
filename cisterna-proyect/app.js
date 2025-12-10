@@ -29,7 +29,7 @@ app.use((req, res, next) => {
     if (!publicPaths.some(p => req.path.startsWith(p)) && req.path !== '/') {
         return res.redirect('/login.html');
     }
-    next();
+    next(); 
 });
 
 // Rutas para páginas
