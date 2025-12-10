@@ -5,31 +5,25 @@ const cors = require('cors');
 require('dotenv').config();
 
 const MONGODB_URI = process.env.MONGODB_URI;
-const { MongoClient } = require('mongodb');
-
-
-
 
 const app = express();
+
 app.use(cors());
-app.use(express.json());
+app.use(express.json());  // ✅ SOLO UNA VEZ
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));  
 
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
-const port = process.env.PORT;
+const port = process.env.PORT || 10000;
 
-// Servir archivos estáticos
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
-
-
-// Rutas para páginas
+// ========== RUTAS PARA PÁGINAS ==========
 app.get('/', (req, res) => {
-    res.redirect('/login.html');
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
+// Las otras rutas igual
 app.get('/historial', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'historial.html'));
 });
@@ -40,10 +34,6 @@ app.get('/reportes', (req, res) => {
 
 app.get('/configuracion', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'configuracion.html'));
-});
-
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 mongoose.connect(MONGODB_URI, {
