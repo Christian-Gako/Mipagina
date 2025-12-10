@@ -12,7 +12,6 @@ let currentFilters = {
 };
 let currentSort = { field: 'fecha', order: 'desc' };
 
-// Instancia del sistema de cisterna para compartir funcionalidades
 const sistemaCisterna = window.sistemaCisterna;
 
 // ============================================
@@ -79,33 +78,20 @@ async function cargarHistorial() {
             sortOrder: currentSort.order
         });
         
-        // ============================================
-        // DEPURACIÓN: Mostrar qué filtros están activos
-        // ============================================
-        console.log('🔍 FILTROS ACTUALES:', {
-            dateRange: currentFilters.dateRange,
-            sensor: currentFilters.sensor,
-            status: currentFilters.status,
-            page: currentPage,
-            limit: itemsPerPage
-        });
-        // ============================================
         
         // 2. Agregar filtro de sensor
         if (currentFilters.sensor && currentFilters.sensor !== '') {
             params.append('sensor', currentFilters.sensor);
-            console.log('✅ Añadiendo filtro sensor:', currentFilters.sensor);
         }
         
         // 3. Agregar filtro de estado
         if (currentFilters.status && currentFilters.status !== '') {
             params.append('estado', currentFilters.status);
-            console.log('✅ Añadiendo filtro estado:', currentFilters.status);
         }
         
         // 4. Agregar filtro de fecha
         const fechas = obtenerFechasFiltro();
-        console.log('📅 Fechas calculadas:', fechas);
+        
         
         if (fechas.inicio) {
             params.append('fechaInicio', fechas.inicio);
@@ -116,7 +102,6 @@ async function cargarHistorial() {
         
         // 5. Llamar a la API con timeout
         const url = `/api/records?${params.toString()}`;
-        console.log('📡 Consultando API:', url);
         
         // ... resto del código igual ...
         const controller = new AbortController();
@@ -146,8 +131,6 @@ async function cargarHistorial() {
             data.pagination = data.pagination || { total: 0, totalPages: 0 };
         }
         
-        console.log(`✅ Datos recibidos: ${data.records?.length || 0} registros`);
-        
         // 7. Actualizar variables
         totalItems = data.pagination?.total || 0;
         totalPages = data.pagination?.totalPages || 1;
@@ -175,7 +158,7 @@ async function cargarHistorial() {
         actualizarInfoResultados();
         
     } catch (error) {
-        console.error('❌ Error cargando datos:', error);
+        console.error('Error cargando datos:', error);
         
         // Mostrar error específico
         let mensajeError = 'Error al cargar datos';
@@ -349,24 +332,21 @@ function configurarEventos() {
         const customDates = document.getElementById('customDates');
         customDates.style.display = this.value === 'custom' ? 'flex' : 'none';
         currentFilters.dateRange = this.value;
-        console.log('📅 Cambiado dateRange a:', this.value);
     });
     
-    // Filtro por sensor
+    // Filtro por sensor (No funciona)
     const sensorFilter = document.getElementById('sensorFilter');
     if (sensorFilter) {
         sensorFilter.addEventListener('change', function() {
             currentFilters.sensor = this.value;
-            console.log('🔧 Cambiado sensor a:', this.value);
         });
     }
     
-    // Filtro por estado
+    // Filtro por estado (No funciona)
     const statusFilter = document.getElementById('statusFilter');
     if (statusFilter) {
         statusFilter.addEventListener('change', function() {
             currentFilters.status = this.value;
-            console.log('⚡ Cambiado status a:', this.value);
         });
     }
     
@@ -376,7 +356,7 @@ function configurarEventos() {
         itemsPerPageSelect.addEventListener('change', function() {
             itemsPerPage = parseInt(this.value);
             currentPage = 1;
-            console.log('📄 Cambiado itemsPerPage a:', this.value);
+            
             cargarHistorial();
         });
     }
@@ -384,7 +364,6 @@ function configurarEventos() {
     // Aplicar filtros
     document.getElementById('applyFilters').addEventListener('click', function() {
         currentPage = 1;
-        console.log('🚀 Aplicando TODOS los filtros...');
         cargarHistorial();
         mostrarMensaje('Filtros aplicados correctamente', 'success');
     });
@@ -524,7 +503,7 @@ async function actualizarAlertaCisterna() {
         actualizarAlertaEnPantalla(data.level);
         
     } catch (error) {
-        console.error("❌ Error obteniendo datos:", error);
+        console.error("Error obteniendo datos:", error);
         mostrarMensaje('Error al obtener el nivel actual', 'danger');
     }
 }
@@ -537,32 +516,31 @@ function actualizarAlertaEnPantalla(level) {
     
     let alertHTML = '';
     
-    // MISMA lógica que en script.js
     if (level <= 15) {
-        alertHTML = `
-            <div class="alert-item danger">
-                ⚠️ Nivel crítico! Revisar suministro de agua
-            </div>
-        `;
-    } else if (level <= 30) {
-        alertHTML = `
-            <div class="alert-item warning">
-                📉 Nivel bajo. Monitorear constantemente
-            </div>
-        `;
-    } else if (level >= 95) {
-        alertHTML = `
-            <div class="alert-item info">
-                ✅ Cisterna casi llena
-            </div>
-        `;
-    } else {
-        alertHTML = `
-            <div class="alert-item info">
-                ✅ Sistema funcionando normalmente
-            </div>
-        `;
-    }
+            alertHTML = `
+                <div class="alert-item danger">
+                    ⚠️ Nivel crítico! Revisar suministro de agua
+                </div>
+            `;
+        } else if (level <= 30) {
+            alertHTML = `
+                <div class="alert-item warning">
+                    📉 Nivel bajo. Monitorear constantemente
+                </div>
+            `;
+        } else if (level >= 95) {
+            alertHTML = `
+                <div class="alert-item info">
+                    ✅ Cisterna casi llena
+                </div>
+            `;
+        } else {
+            alertHTML = `
+                <div class="alert-item info">
+                    ✅ Sistema funcionando normalmente
+                </div>
+            `;
+        }
     
     alertsList.innerHTML = alertHTML;
     
@@ -640,7 +618,7 @@ async function confirmarExportacion() {
         } else {
             // Para "todos los datos", añadir parámetro
             params.append('allData', 'true');
-            console.log('📤 Exportando TODOS los datos');
+            console.log('Exportando TODOS los datos');
         }
         
         // Redirigir para descargar
@@ -650,13 +628,13 @@ async function confirmarExportacion() {
         mostrarMensaje('Exportación iniciada...', 'info');
         
     } catch (error) {
-        console.error('❌ Error exportando:', error);
+        console.error('Error exportando:', error);
         mostrarMensaje('Error al exportar: ' + error.message, 'danger');
     }
 }
 
 // ============================================
-// EVENT LISTENERS - Añade estos si no los tienes
+// EVENT LISTENERS
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -819,11 +797,8 @@ function crearContenedorMensajes() {
 // INICIALIZACIÓN
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar valores por defecto en fechas personalizadas
-    //const hoy = new Date().toISOString().split('T')[0];
     const semanaAtras = new Date();
     semanaAtras.setDate(semanaAtras.getDate() - 7);
-    //const semanaAtrasStr = semanaAtras.toISOString().split('T')[0];
     
     // Cargar alerta inicial
     actualizarAlertaCisterna();
@@ -834,7 +809,4 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Actualizar alertas periódicamente (cada 10 segundos como en dashboard)
     setInterval(actualizarAlertaCisterna, 10000);
-    
-    console.log('✅ Historial inicializado correctamente');
-    console.log('📡 Usando API: /api/records');
 });

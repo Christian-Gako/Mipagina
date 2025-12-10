@@ -1,4 +1,4 @@
-// public/script.js - VERSIÓN CON CONFIGURACIÓN DINÁMICA
+// public/script.js
 class SistemaCisterna {
     constructor() {
         // Elementos que pueden estar en cualquier página
@@ -15,8 +15,7 @@ class SistemaCisterna {
     }
 
     init() {
-        console.log("🚀 Iniciando sistema de cisterna...");
-        
+                
         // Cargar configuración en el dashboard
         this.cargarConfiguracionEnDashboard();
         
@@ -34,7 +33,6 @@ class SistemaCisterna {
             // En otras páginas, solo actualizar cada 10 segundos
             setInterval(() => this.updateCommonInfo(), 10000);
         }
-        
         // Actualizar timestamp común cada minuto
         setInterval(() => this.updateLastRefresh(), 60000);
     }
@@ -44,7 +42,6 @@ class SistemaCisterna {
         
         // Cargar configuración desde localStorage
         const config = JSON.parse(localStorage.getItem('configuracionCisterna')) || {};
-        console.log('📋 Cargando configuración en dashboard:', config);
         
         // Mapeo de campos de configuración a elementos HTML
         const mapeoCampos = {
@@ -82,7 +79,7 @@ class SistemaCisterna {
                     if (valor.includes('-')) {
                         // Si es formato YYYY-MM-DD
                         const fecha = new Date(valor);
-                        valor = fecha.toLocaleDateString('es-ES', {
+                        valor = fecha.toLocaleDateString('es-MX', {
                             day: '2-digit',
                             month: 'short',
                             year: 'numeric'
@@ -91,29 +88,28 @@ class SistemaCisterna {
                 }
                 
                 elemento.textContent = valor;
-                console.log(`✅ Actualizado ${campoConfig}: ${valor}`);
             }
         });
     }
 
     getValorPorDefecto(campo) {
         const valoresPorDefecto = {
-            'cisternaNombre': 'Cisterna - Sorluana',
-            'cisternaCapacidad': '10000',
-            'cisternaUbicacion': 'Edificio G - Sor Juana',
-            'cisternaMaterial': 'Concreto armado',
-            'sensorModelo': 'Sensor Capacitivo XYZ-2000',
-            'sensorID': 'CAP-SENS-001',
-            'sensorInstalacion': '15/Oct/2024',
-            'sensorPrecision': '±2%',
-            'frecuenciaMuestreo': '10000'
+            'cisternaNombre': 'No obtenido',
+            'cisternaCapacidad': '0',
+            'cisternaUbicacion': 'No obtenido',
+            'cisternaMaterial': 'No obtenido',
+            'sensorModelo': 'No obtenido',
+            'sensorID': 'No obtenido',
+            'sensorInstalacion': 'No obtenido',
+            'sensorPrecision': 'No obtenido',
+            'frecuenciaMuestreo': 'No obtenido'
         };
         return valoresPorDefecto[campo] || '';
     }
 
     formatearFrecuencia(ms) {
         if (!ms) return 'Cada 10 segundos';
-        
+
         const segundos = parseInt(ms) / 1000;
         if (segundos < 60) {
             return `Cada ${segundos} segundos`;
@@ -126,21 +122,17 @@ class SistemaCisterna {
     escucharCambiosConfiguracion() {
         // Escuchar evento personalizado desde config.js
         window.addEventListener('configuracionActualizada', () => {
-            console.log('🔄 Configuración actualizada, recargando dashboard...');
             this.cargarConfiguracionEnDashboard();
         });
         
-        // Escuchar cambios en localStorage (para otras pestañas)
         window.addEventListener('storage', (e) => {
             if (e.key === 'configuracionCisterna') {
-                console.log('🔄 Configuración cambiada en otra pestaña, actualizando...');
                 setTimeout(() => this.cargarConfiguracionEnDashboard(), 100);
             }
         });
     }
 
     isDashboardPage() {
-        // Verificar si estamos en la página del dashboard
         return this.waterElement !== null && 
                this.percentageElement !== null && 
                this.lastUpdateElement !== null;
@@ -156,7 +148,7 @@ class SistemaCisterna {
             this.updateLastRefresh();
             
         } catch (error) {
-            console.error("❌ Error obteniendo datos:", error);
+            console.error("Error obteniendo datos:", error);
             this.showError();
         }
     }
@@ -172,7 +164,7 @@ class SistemaCisterna {
             this.updateLastRefresh();
             
         } catch (error) {
-            console.error("❌ Error en dashboard:", error);
+            console.error("Error en dashboard:", error);
             this.showError();
         }
     }
