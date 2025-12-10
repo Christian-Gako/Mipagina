@@ -77,7 +77,7 @@ async function cargarHistorial() {
             sortBy: obtenerCampoAPI(currentSort.field),
             sortOrder: currentSort.order
         });
-        
+        const token = sessionStorage.getItem('authToken');
         
         // 2. Agregar filtro de sensor
         if (currentFilters.sensor && currentFilters.sensor !== '') {
