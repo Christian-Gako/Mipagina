@@ -13,6 +13,7 @@ app.use(express.json());  // ✅ SOLO UNA VEZ
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));  
 
+
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
@@ -20,6 +21,7 @@ const port = process.env.PORT || 10000;
 
 // ========== RUTAS PARA PÁGINAS ==========
 app.get('/', (req, res) => {
+    localStorage.clear()
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
