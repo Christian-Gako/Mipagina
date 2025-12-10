@@ -162,7 +162,12 @@
             <p>Sistema de Monitoreo v0.4</p>
         </footer>
             </div>
-
+            <script>
+                if (!localStorage.getItem('authToken')) {
+                    // Redirigir limpiamente
+                    window.location.replace('/login.html');
+                }
+            </script>
             <script src="script.js"></script>
     </body>
 </html>

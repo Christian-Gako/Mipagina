@@ -25,7 +25,7 @@ app.use(express.json());
 
 // Rutas para páginas
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.redirect('/login.html');
 });
 
 app.get('/historial', (req, res) => {
@@ -40,6 +40,9 @@ app.get('/configuracion', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'configuracion.html'));
 });
 
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
 
 mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,

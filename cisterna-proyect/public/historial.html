@@ -258,7 +258,12 @@
             </div>
         </div>
     </div>
-
+    <script>
+        if (!localStorage.getItem('authToken')) {
+            // Redirigir limpiamente
+            window.location.replace('/login.html');
+        }
+    </script>
     <script src="historial.js"></script>
 </body>
 </html>
