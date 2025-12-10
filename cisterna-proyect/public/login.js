@@ -1,7 +1,4 @@
-if (!sessionStorage.getItem('authToken')) {
-    window.location.href = 'login.html';
-    throw new Error('No autenticado');
-}
+
         const API_URL = 'https://simona-9e42.onrender.com/api';
         
         // Elementos del DOM

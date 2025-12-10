@@ -24,13 +24,6 @@ const port = process.env.PORT;
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-app.use((req, res, next) => {
-    const publicPaths = ['/login.html', '/login', '/api/'];
-    if (!publicPaths.some(p => req.path.startsWith(p)) && req.path !== '/') {
-        return res.redirect('/login.html');
-    }
-    next(); 
-});
 
 // Rutas para páginas
 app.get('/', (req, res) => {

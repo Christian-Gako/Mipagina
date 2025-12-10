@@ -1,7 +1,4 @@
-if (!sessionStorage.getItem('authToken')) {
-    window.location.href = 'login.html';
-    throw new Error('No autenticado');
-}
+
 
 // public/config.js - VERSIÓN CORREGIDA (GUARDA ANTES DE REINICIAR)
 class ConfiguracionManager {

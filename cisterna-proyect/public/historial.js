@@ -10,10 +10,7 @@ let currentFilters = {
     sensor: '',
     status: ''
 };
-if (!sessionStorage.getItem('authToken')) {
-    window.location.href = 'login.html';
-    throw new Error('No autenticado');
-}
+
 let currentSort = { field: 'fecha', order: 'desc' };
 
 const sistemaCisterna = window.sistemaCisterna;

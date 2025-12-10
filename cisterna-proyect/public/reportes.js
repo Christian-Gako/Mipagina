@@ -1,10 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     configurarReportes();
 });
-if (!sessionStorage.getItem('authToken')) {
-    window.location.href = 'login.html';
-    throw new Error('No autenticado');
-}
+
 function configurarReportes() {
     const reportCards = document.querySelectorAll('.report-card');
     const reportConfig = document.getElementById('reportConfig');
