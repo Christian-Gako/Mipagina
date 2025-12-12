@@ -620,11 +620,6 @@ app.post('/api/esp32/data', async (req, res) => {
 
 async function iniciarServidor() {
     await cargarConfiguracionInicial();
-    
-    app.listen(port, () => {
-        console.log(`📊 Frecuencia de muestreo: ${intervaloMuestreo}ms`);
-
-    });
 }
 
 

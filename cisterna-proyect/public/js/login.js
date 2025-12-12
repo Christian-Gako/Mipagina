@@ -161,7 +161,7 @@ function checkExistingSession() {
             
             if (shouldRedirect) {
                 console.log('Sesión activa encontrada, redirigiendo...');
-                window.location.href = '/index';
+                window.location.href = '/dashboard';
             }
         } catch (e) {
             // Datos corruptos, limpiar
