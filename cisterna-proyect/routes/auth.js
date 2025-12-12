@@ -80,7 +80,32 @@ router.post('/login', async (req, res) => {
         });
     }
 });
-// routes/auth.js - Agrega esta ruta
+//agregando linea random
+// Middleware de autenticación (para usar en otras rutas)
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    
+    if (!token) {
+        return res.status(401).json({ 
+            success: false, 
+            error: 'Token no proporcionado' 
+        });
+    }
+    
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({ 
+                success: false, 
+                error: 'Token inválido o expirado' 
+            });
+        }
+        
+        req.user = user; // Adjuntar info del usuario a la request
+        next();
+    });
+};
+// routes/auth.js
 router.get('/session-status', authenticateToken, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId)
@@ -111,31 +136,6 @@ router.get('/session-status', authenticateToken, async (req, res) => {
         });
     }
 });
-
-// Middleware de autenticación (para usar en otras rutas)
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-    
-    if (!token) {
-        return res.status(401).json({ 
-            success: false, 
-            error: 'Token no proporcionado' 
-        });
-    }
-    
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-        if (err) {
-            return res.status(403).json({ 
-                success: false, 
-                error: 'Token inválido o expirado' 
-            });
-        }
-        
-        req.user = user; // Adjuntar info del usuario a la request
-        next();
-    });
-};
 
 // Ruta protegida de ejemplo
 router.get('/profile', authenticateToken, async (req, res) => {
