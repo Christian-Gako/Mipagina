@@ -24,6 +24,9 @@ app.get('/', (req, res) => {
     localStorage.clear()
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
+app.get('/index', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 app.get('/historial', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'historial.html'));
