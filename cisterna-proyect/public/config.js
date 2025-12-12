@@ -1,5 +1,20 @@
+if (!sessionStorage.getItem('authToken')) {
+    window.location.href = 'login.html';
+    throw new Error('No autenticado');
+}
 
+// Validar sesión al cargar la página
+document.addEventListener('DOMContentLoaded', async function() {
+    // 1. Primero validar sesión
+    if (!AuthMiddleware.protectPage()) {
+        return; // Si no está autenticado, se redirigió al login
+    }
+    
+    // 2. Si está autenticado, cargar datos del usuario
+    const user = AuthMiddleware.getUser();
+    new ConfiguracionManager();
 
+});
 // public/config.js - VERSIÓN CORREGIDA (GUARDA ANTES DE REINICIAR)
 class ConfiguracionManager {
     constructor() {
@@ -177,7 +192,6 @@ class ConfiguracionManager {
         const evento = new Event('configuracionActualizada');
         window.dispatchEvent(evento);
         localStorage.setItem('configuracionActualizada', Date.now().toString());
-        console.log('📢 Cambio de configuración notificado');
     }
 
     restablecerValores() {
@@ -209,7 +223,3 @@ class ConfiguracionManager {
     }
 }
 
-// Inicializar cuando la página cargue
-document.addEventListener('DOMContentLoaded', function() {
-    new ConfiguracionManager();
-});

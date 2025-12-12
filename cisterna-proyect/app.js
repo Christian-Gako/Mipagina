@@ -9,7 +9,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const app = express();
 
 app.use(cors());
-app.use(express.json());  // ✅ SOLO UNA VEZ
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));  
 
@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
-const port = process.env.PORT || 10000;
+const port = process.env.PORT;
 
 // ========== RUTAS PARA PÁGINAS ==========
 app.get('/', (req, res) => {
@@ -25,7 +25,6 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// Las otras rutas igual
 app.get('/historial', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'historial.html'));
 });

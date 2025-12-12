@@ -80,6 +80,37 @@ router.post('/login', async (req, res) => {
         });
     }
 });
+// routes/auth.js - Agrega esta ruta
+router.get('/session-status', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId)
+            .select('-password');
+        
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: 'Usuario no encontrado'
+            });
+        }
+        
+        res.json({
+            success: true,
+            user: {
+                id: user._id,
+                username: user.username,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            },
+            sessionValid: true
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
 
 // Middleware de autenticación (para usar en otras rutas)
 const authenticateToken = (req, res, next) => {

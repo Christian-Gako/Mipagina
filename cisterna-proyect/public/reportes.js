@@ -1,6 +1,17 @@
-document.addEventListener('DOMContentLoaded', function() {
+// reportes.js - VERSIÓN CORREGIDA
+document.addEventListener('DOMContentLoaded', async function() {
+    // 1. Primero validar sesión
+    if (!AuthMiddleware.protectPage()) {
+        return; // Si no está autenticado, se redirigió al login
+    }
+    
+    // 2. Si está autenticado, cargar datos del usuario
+    const user = AuthMiddleware.getUser();
+    
+    // 3. Configurar funcionalidades de la página
     configurarReportes();
 });
+
 
 function configurarReportes() {
     const reportCards = document.querySelectorAll('.report-card');

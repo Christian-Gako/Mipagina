@@ -143,12 +143,7 @@
 	     <p>Sistema de Monitoreo de Cisterna v0.4</p>
         </footer>
     </div>
-    <script>
-        if (!localStorage.getItem('authToken')) {
-            // Redirigir limpiamente
-            window.location.replace('/login.html');
-        }
-    </script>
+    <script src="/js/auth-middleware.js"></script>
     <script src="script.js"></script>
     <script src="config.js"></script>
 </body>

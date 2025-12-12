@@ -11,6 +11,24 @@ let currentFilters = {
     status: ''
 };
 
+
+document.addEventListener('DOMContentLoaded', async function() {
+    // 1. Primero validar sesión
+    if (!AuthMiddleware.protectPage()) {
+        return; // Si no está autenticado, se redirigió al login
+    }
+    
+    // 2. Si está autenticado, cargar datos del usuario
+    const user = AuthMiddleware.getUser();
+    
+    // Cargar alerta inicial
+    actualizarAlertaCisterna();
+    
+    // Configurar y cargar todo
+    configurarEventos();
+    cargarHistorial();
+
+});
 let currentSort = { field: 'fecha', order: 'desc' };
 
 const sistemaCisterna = window.sistemaCisterna;
@@ -794,20 +812,3 @@ function crearContenedorMensajes() {
     return contenedor;
 }
 
-// ============================================
-// INICIALIZACIÓN
-// ============================================
-document.addEventListener('DOMContentLoaded', function() {
-    const semanaAtras = new Date();
-    semanaAtras.setDate(semanaAtras.getDate() - 7);
-    
-    // Cargar alerta inicial
-    actualizarAlertaCisterna();
-    
-    // Configurar y cargar todo
-    configurarEventos();
-    cargarHistorial();
-    
-    // Actualizar alertas periódicamente (cada 10 segundos como en dashboard)
-    setInterval(actualizarAlertaCisterna, 10000);
-});

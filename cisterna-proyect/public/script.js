@@ -1,4 +1,4 @@
-// public/script.js
+// public/script.js - VERSIÓN CORREGIDA CON AUTENTICACIÓN
 class SistemaCisterna {
     constructor() {
         // Elementos que pueden estar en cualquier página
@@ -11,11 +11,95 @@ class SistemaCisterna {
         this.lastUpdateElement = document.getElementById('lastUpdate');
         this.statusElement = document.getElementById('status');
         
+        // Token de autenticación
+        this.authToken = null;
+        this.userData = null;
+        
         this.init();
     }
 
     init() {
+        // 1. Verificar autenticación
+        if (!this.checkAuthentication()) {
+            console.log('Usuario no autenticado, redirigiendo...');
+            return;
+        }
+        
+        // 2. Cargar token y datos del usuario
+        this.loadUserData();
+        
+        // 3. Configurar fetch con interceptor de token
+        this.setupAuthInterceptor();
+        
+        // 4. Continuar con la inicialización normal
+        this.continueInitialization();
+    }
+
+    checkAuthentication() {
+        // Verificar si está autenticado usando el middleware
+        return AuthMiddleware.isAuthenticated();
+    }
+
+    loadUserData() {
+        // Cargar datos del usuario desde sessionStorage
+        this.userData = AuthMiddleware.getUser();
+        this.authToken = AuthMiddleware.getToken();
+        
+        console.log('Usuario cargado:', this.userData?.username);
+        
+        // Mostrar nombre de usuario si hay elemento para ello
+        this.showUserName();
+    }
+
+    showUserName() {
+        // Mostrar nombre de usuario en la interfaz si existe el elemento
+        const userDisplay = document.getElementById('userDisplay');
+        const userName = document.getElementById('userName');
+        
+        if (userDisplay && this.userData?.name) {
+            userDisplay.textContent = this.userData.name;
+        }
+        
+        if (userName && this.userData?.username) {
+            userName.textContent = this.userData.username;
+        }
+    }
+
+    setupAuthInterceptor() {
+        // Guardar referencia original de fetch
+        const originalFetch = window.fetch;
+        
+        // Sobrescribir fetch para agregar token automáticamente
+        window.fetch = async (url, options = {}) => {
+            // Agregar token a las peticiones (excepto login)
+            if (this.authToken && !url.includes('/auth/login')) {
+                options.headers = {
+                    ...options.headers,
+                    'Authorization': `Bearer ${this.authToken}`
+                };
+            }
+            
+            try {
+                const response = await originalFetch(url, options);
                 
+                // Si la respuesta es 401 o 403, hacer logout
+                if (response.status === 401 || response.status === 403) {
+                    console.log('Token inválido o expirado, redirigiendo...');
+                    AuthMiddleware.redirectToLogin();
+                    return response;
+                }
+                
+                return response;
+            } catch (error) {
+                console.error('Error en petición:', error);
+                throw error;
+            }
+        };
+    }
+
+    continueInitialization() {
+        // Solo ejecutar después de verificar autenticación
+        
         // Cargar configuración en el dashboard
         this.cargarConfiguracionEnDashboard();
         
@@ -33,10 +117,25 @@ class SistemaCisterna {
             // En otras páginas, solo actualizar cada 10 segundos
             setInterval(() => this.updateCommonInfo(), 10000);
         }
+        
         // Actualizar timestamp común cada minuto
         setInterval(() => this.updateLastRefresh(), 60000);
+        
+        // Verificar sesión periódicamente
+        this.startSessionMonitor();
     }
 
+    startSessionMonitor() {
+        // Verificar sesión cada minuto
+        setInterval(() => {
+            if (!AuthMiddleware.isAuthenticated()) {
+                console.log('Sesión expirada, redirigiendo...');
+                AuthMiddleware.redirectToLogin();
+            }
+        }, 60000);
+    }
+
+    // El resto de tus métodos existentes se mantienen igual...
     cargarConfiguracionEnDashboard() {
         if (!this.isDashboardPage()) return;
         
@@ -254,7 +353,10 @@ class SistemaCisterna {
     }
 }
 
-// Inicializar el sistema cuando la página cargue
+// Inicialización simplificada
 document.addEventListener('DOMContentLoaded', function() {
-    new SistemaCisterna();
+    // Solo crear la instancia si está autenticado
+    if (AuthMiddleware.protectPage()) {
+        new SistemaCisterna();
+    }
 });

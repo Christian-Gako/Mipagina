@@ -48,7 +48,6 @@
             
             try {
                 // Intentar autenticación con el servidor
-                console.log("given: ",username, " and ",password);
                 const response = await fetch(`${API_URL}/auth/login`, {
                     method: 'POST',
                     headers: {
@@ -66,14 +65,13 @@
                 
                 if (response.ok && data.success) {
                     // Login exitoso
-                    showAlert(' Autenticación exitosa. Redirigiendo...', 'success');
+                    showAlert(' Autenticación exitosa', 'success');
                     
-                    // Guardar datos de sesión
-                    localStorage.setItem('authToken', data.token);
-                    localStorage.setItem('userData', JSON.stringify(data.user));
-
-                    localStorage.setItem('lastLogin', new Date().toISOString());
-                    console.log("token: ",data.token);
+                    // Guardar datos de sesión en SESSIONSTORAGE (se borra al cerrar pestaña)
+                    sessionStorage.setItem('authToken', data.token);
+                    sessionStorage.setItem('userData', JSON.stringify(data.user));
+                    sessionStorage.setItem('lastLogin', new Date().toISOString());
+                    console.log("token: ", data.token);
                     
                     // Registrar login exitoso
                     console.log(`Login exitoso: ${data.user.username} (${data.user.role})`);
@@ -82,7 +80,6 @@
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 1000);
-                    
                 } else {
                     // Login fallido
                     const errorMsg = data.error || 'Credenciales incorrectas';
@@ -142,33 +139,38 @@
     
 
         // Verificar si ya hay sesión activa
-        function checkExistingSession() {
-            const token = localStorage.getItem('authToken');
-            const userData = localStorage.getItem('userData');
+function checkExistingSession() {
+    const token = sessionStorage.getItem('authToken');
+    const userData = sessionStorage.getItem('userData');
+    
+    if (token && userData) {
+        try {
+            // Verificar expiración
+            const lastLogin = sessionStorage.getItem('lastLogin');
+            let shouldRedirect = true;
             
-            if (token && userData) {
-                try {
-                    const user = JSON.parse(userData);
-                    const lastLogin = localStorage.getItem('lastLogin');
-                    const hoursSinceLogin = lastLogin ? 
-                        (new Date() - new Date(lastLogin)) / (1000 * 60 * 60) : 24;
-                    
-                    // Si la sesión es menor a 8 horas, redirigir
-                    if (hoursSinceLogin < 8) {
-                        console.log(`Sesión activa encontrada: ${user.username}`);
-                        window.location.href = 'index.html';
-                    } else {
-                        // Sesión expirada, limpiar
-                        localStorage.removeItem('authToken');
-                        localStorage.removeItem('userData');
-                        showAlert('Sesión expirada. Por favor, inicie sesión nuevamente.', 'error');
-                    }
-                } catch (e) {
-                    // Datos corruptos, limpiar
-                    localStorage.clear();
+            if (lastLogin) {
+                const hoursSinceLogin = (new Date() - new Date(lastLogin)) / (1000 * 60 * 60);
+                if (hoursSinceLogin >= process.env.JWT_EXPIRES_IN||1) {
+                    // Sesión expirada, limpiar
+                    sessionStorage.clear();
+                    shouldRedirect = false;
+                    console.log('Sesión expirada, limpiando...');
                 }
             }
+            
+            if (shouldRedirect) {
+                console.log('Sesión activa encontrada, redirigiendo...');
+                window.location.href = 'index.html';
+            }
+        } catch (e) {
+            // Datos corruptos, limpiar
+            sessionStorage.clear();
+            console.error('Error verificando sesión:', e);
         }
+    }
+}
+    
 
         // Verificar sesión al cargar
         window.addEventListener('DOMContentLoaded', checkExistingSession);
