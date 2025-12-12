@@ -78,7 +78,7 @@
                     
                     // Redirigir después de 1 segundo
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        window.location.href = '/dashboard';
                     }, 1000);
                 } else {
                     // Login fallido
@@ -161,7 +161,7 @@ function checkExistingSession() {
             
             if (shouldRedirect) {
                 console.log('Sesión activa encontrada, redirigiendo...');
-                window.location.href = 'index.html';
+                window.location.href = '/index';
             }
         } catch (e) {
             // Datos corruptos, limpiar

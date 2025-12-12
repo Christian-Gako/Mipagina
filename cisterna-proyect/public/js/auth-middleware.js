@@ -68,12 +68,6 @@ class AuthMiddleware {
         }
     }
 
-    // Redirigir al login
-    static redirectToLogin() {
-        this.clearSession();
-        window.location.href = '/';
-    }
-
     // Configurar interceptor para todas las peticiones fetch
     static setupFetchInterceptor() {
         const originalFetch = window.fetch;
@@ -105,32 +99,34 @@ class AuthMiddleware {
 
     // Proteger página
     static protectPage() {
-        // Verificación DIRECTA primero (más confiable)
+        const currentPath = window.location.pathname;
         const token = sessionStorage.getItem('authToken');
         const userData = sessionStorage.getItem('userData');
         
-        // Páginas públicas (login)
-        if (window.location.pathname === '/' || 
-            window.location.pathname.includes('login')) {
-            
-            // Si YA tiene token, redirigir al dashboard
+        // 1. PÁGINAS PÚBLICAS (solo / y /login)
+        if (currentPath === '/' || currentPath === '/login') {
+            // Si YA está autenticado → redirigir a dashboard
             if (token && userData) {
-                console.log('Ya autenticado, redirigiendo a dashboard');
-                window.location.href = 'index.html';
+                window.location.href = '/dashboard';
                 return false;
             }
-            
-            return true; // Permitir acceso al login
+            // Si NO está autenticado → permitir acceso
+            return true;
         }
         
-        // Páginas protegidas - verificar token DIRECTAMENTE
+        // 2. PÁGINAS PROTEGIDAS (todas las demás)
         if (!token || !userData) {
-            console.log('No autenticado (verificación directa), redirigiendo...');
             this.redirectToLogin();
             return false;
         }
         
-        return true; // Permitir acceso
+        // 3. USUARIO AUTENTICADO → permitir acceso
+        return true;
+    }
+    // Redirigir al login
+    static redirectToLogin() {
+        this.clearSession();
+        window.location.href = '/';
     }
 }
 
