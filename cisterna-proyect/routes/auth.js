@@ -80,8 +80,7 @@ router.post('/login', async (req, res) => {
         });
     }
 });
-//agregando linea random
-// Middleware de autenticación (para usar en otras rutas)
+
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN

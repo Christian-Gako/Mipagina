@@ -1,7 +1,3 @@
-if (!sessionStorage.getItem('authToken')) {
-    window.location.href = 'login.html';
-    throw new Error('No autenticado');
-}
 
 // Validar sesión al cargar la página
 document.addEventListener('DOMContentLoaded', async function() {

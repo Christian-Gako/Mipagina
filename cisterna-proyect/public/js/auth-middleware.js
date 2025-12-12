@@ -103,21 +103,34 @@ class AuthMiddleware {
         };
     }
 
-    // Proteger página - VERSIÓN CORREGIDA
+    // Proteger página
     static protectPage() {
-        // No proteger páginas de login
+        // Verificación DIRECTA primero (más confiable)
+        const token = sessionStorage.getItem('authToken');
+        const userData = sessionStorage.getItem('userData');
+        
+        // Páginas públicas (login)
         if (window.location.pathname === '/' || 
             window.location.pathname.includes('login')) {
-            return true; // Permitir acceso
+            
+            // Si YA tiene token, redirigir al dashboard
+            if (token && userData) {
+                console.log('Ya autenticado, redirigiendo a dashboard');
+                window.location.href = 'index.html';
+                return false;
+            }
+            
+            return true; // Permitir acceso al login
         }
         
-        // Verificar autenticación local
-        if (!this.isAuthenticated()) {
+        // Páginas protegidas - verificar token DIRECTAMENTE
+        if (!token || !userData) {
+            console.log('No autenticado (verificación directa), redirigiendo...');
             this.redirectToLogin();
             return false;
         }
         
-        return true;
+        return true; // Permitir acceso
     }
 }
 
