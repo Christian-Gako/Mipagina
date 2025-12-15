@@ -226,6 +226,44 @@ function verificarSessionStorage() {
         console.error('  - ERROR sessionStorage:', error);
     }
 }
+// Al INICIO de login.js, después de las constantes:
+console.log('📄 login.js: Inicializando...');
+
+// VERIFICAR ELEMENTOS DEL DOM
+function verificarDOM() {
+    console.log('🔍 Verificando elementos DOM:');
+    
+    const elementos = {
+        'loginForm': document.getElementById('loginForm'),
+        'username': document.getElementById('username'),
+        'password': document.getElementById('password'),
+        'loginBtn': document.getElementById('loginBtn'),
+        'alertMessage': document.getElementById('alertMessage'),
+        'loginContainer': document.querySelector('.login-container'),
+        'loginCard': document.querySelector('.login-card')
+    };
+    
+    Object.keys(elementos).forEach(key => {
+        console.log(`  ${key}:`, elementos[key] ? '✅ ENCONTRADO' : '❌ NO ENCONTRADO');
+    });
+    
+    // Si falta el formulario, mostrar error
+    if (!elementos.loginForm) {
+        console.error('❌ ERROR CRÍTICO: Formulario de login NO encontrado');
+        document.body.innerHTML = `
+            <div style="padding: 50px; text-align: center; font-family: Arial;">
+                <h1 style="color: red;">ERROR: Formulario no encontrado</h1>
+                <p>El formulario de login no se pudo cargar.</p>
+                <p>URL: ${window.location.href}</p>
+                <p>Path: ${window.location.pathname}</p>
+                <button onclick="location.reload()">Recargar página</button>
+            </div>
+        `;
+    }
+}
+
+// Ejecutar verificación inmediatamente
+verificarDOM();
 
 // Ejecutar verificación al cargar
 window.addEventListener('DOMContentLoaded', verificarSessionStorage);
