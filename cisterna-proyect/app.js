@@ -21,7 +21,6 @@ const port = process.env.PORT;
 
 // ========== RUTAS PARA PÁGINAS ==========
 app.get('/', (req, res) => {
-    //localStorage.clear()
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 

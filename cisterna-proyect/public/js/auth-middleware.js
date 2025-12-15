@@ -97,36 +97,42 @@ class AuthMiddleware {
         };
     }
 
-    // Proteger página
+        // En auth-middleware.js, modifica protectPage():
     static protectPage() {
+        console.log('🔒 [auth-middleware] protectPage() INICIANDO');
+        console.log('📍 Ruta actual:', window.location.pathname);
+        console.log('🔑 Token en sessionStorage:', sessionStorage.getItem('authToken') ? 'SÍ' : 'NO');
+        console.log('👤 UserData en sessionStorage:', sessionStorage.getItem('userData') ? 'SÍ' : 'NO');
+        
         const currentPath = window.location.pathname;
         const token = sessionStorage.getItem('authToken');
         const userData = sessionStorage.getItem('userData');
         
-        // 1. PÁGINAS PÚBLICAS (solo / y /login)
-        if (currentPath === '/' || currentPath === '/login') {
+        // Si estamos en la página de login ("/")
+        if (currentPath === '/') {
+            console.log('📄 Estamos en la página de login (/)');
+            
             // Si YA está autenticado → redirigir a dashboard
             if (token && userData) {
+                console.log('🔄 Usuario YA autenticado, redirigiendo a /dashboard');
                 window.location.href = '/dashboard';
                 return false;
             }
-            // Si NO está autenticado → permitir acceso
-            return true;
+            
+            console.log('✅ Usuario NO autenticado, mostrar formulario de login');
+            return true; // Permitir acceso al login
         }
         
-        // 2. PÁGINAS PROTEGIDAS (todas las demás)
+        // Si estamos en CUALQUIER OTRA página y NO está autenticado
         if (!token || !userData) {
+            console.log('🚫 Usuario NO autenticado para página protegida, redirigiendo a /');
             this.redirectToLogin();
             return false;
         }
         
-        // 3. USUARIO AUTENTICADO → permitir acceso
+        // Usuario autenticado en página protegida → PERMITIR ACCESO
+        console.log('✅ Usuario autenticado, permitir acceso');
         return true;
-    }
-    // Redirigir al login
-    static redirectToLogin() {
-        this.clearSession();
-        window.location.href = '/';
     }
 }
 
@@ -139,5 +145,32 @@ class AuthMiddleware {
             AuthMiddleware.setupFetchInterceptor();
             window.AuthMiddlewareInitialized = true;
         }
+    }
+})();
+
+// Al final de auth-middleware.js, después de todo:
+(function() {
+    if (typeof window !== 'undefined') {
+        // Esperar 100ms para que todo cargue, luego verificar
+        setTimeout(() => {
+            console.log('⏰ Verificación de seguridad ejecutándose...');
+            
+            const currentPath = window.location.pathname;
+            const token = sessionStorage.getItem('authToken');
+            const userData = sessionStorage.getItem('userData');
+            
+            // REGLA DE SEGURIDAD: Si estamos en "/" y tenemos token, redirigir
+            if (currentPath === '/' && token && userData) {
+                console.log('🛡️ Seguridad: Redirigiendo usuario autenticado desde /');
+                window.location.href = '/dashboard';
+            }
+            
+            // REGLA DE SEGURIDAD: Si NO estamos en "/" y NO tenemos token, redirigir
+            if (currentPath !== '/' && (!token || !userData)) {
+                console.log('🛡️ Seguridad: Redirigiendo usuario no autenticado a /');
+                sessionStorage.clear();
+                window.location.href = '/';
+            }
+        }, 100);
     }
 })();

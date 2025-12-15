@@ -16,6 +16,16 @@
             passwordInput.setAttribute('type', type);
             this.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
         });
+        // Al INICIO de login.js, después de las constantes:
+console.log('📄 login.js cargando...');
+
+// Verificar si auth-middleware.js se cargó correctamente
+if (typeof AuthMiddleware === 'undefined') {
+    console.error('❌ ERROR: AuthMiddleware no está definido');
+    console.error('❌ Verifica que auth-middleware.js se esté cargando en login.html');
+} else {
+    console.log('✅ AuthMiddleware cargado correctamente');
+}
 
     
 
@@ -135,45 +145,6 @@
                 btnLoader.style.display = 'none';
             }
         }
-
-    
-
-        // Verificar si ya hay sesión activa
-function checkExistingSession() {
-    const token = sessionStorage.getItem('authToken');
-    const userData = sessionStorage.getItem('userData');
-    
-    if (token && userData) {
-        try {
-            // Verificar expiración
-            const lastLogin = sessionStorage.getItem('lastLogin');
-            let shouldRedirect = true;
-            
-            if (lastLogin) {
-                const hoursSinceLogin = (new Date() - new Date(lastLogin)) / (1000 * 60 * 60);
-                if (hoursSinceLogin >= process.env.JWT_EXPIRES_IN||1) {
-                    // Sesión expirada, limpiar
-                    sessionStorage.clear();
-                    shouldRedirect = false;
-                    console.log('Sesión expirada, limpiando...');
-                }
-            }
-            
-            if (shouldRedirect) {
-                console.log('Sesión activa encontrada, redirigiendo...');
-                window.location.href = '/dashboard';
-            }
-        } catch (e) {
-            // Datos corruptos, limpiar
-            sessionStorage.clear();
-            console.error('Error verificando sesión:', e);
-        }
-    }
-}
-    
-
-        // Verificar sesión al cargar
-        window.addEventListener('DOMContentLoaded', checkExistingSession);
 
         // Prevenir múltiples envíos
         let isSubmitting = false;
