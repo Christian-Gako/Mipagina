@@ -1,172 +1,252 @@
+// login.js - VERSIÓN CORREGIDA
+const API_URL = 'https://simona-9e42.onrender.com/api';
 
-        const API_URL = 'https://simona-9e42.onrender.com/api';
-        
-        // Elementos del DOM
-        const loginForm = document.getElementById('loginForm');
-        const loginBtn = document.getElementById('loginBtn');
-        const btnText = document.getElementById('btnText');
-        const btnLoader = document.getElementById('btnLoader');
-        const alertMessage = document.getElementById('alertMessage');
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('password');
+// Elementos del DOM
+const loginForm = document.getElementById('loginForm');
+const loginBtn = document.getElementById('loginBtn');
+const btnText = document.getElementById('btnText');
+const btnLoader = document.getElementById('btnLoader');
+const alertMessage = document.getElementById('alertMessage');
+const togglePassword = document.getElementById('togglePassword');
+const passwordInput = document.getElementById('password');
 
-        // Mostrar/ocultar contraseña
-        togglePassword.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            this.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
-        });
-        // Al INICIO de login.js, después de las constantes:
-console.log('📄 login.js cargando...');
+// ========== VERIFICACIÓN INICIAL ==========
+console.log('📄 login.js: Inicializando...');
+console.log('📍 URL actual:', window.location.href);
+console.log('📍 Pathname:', window.location.pathname);
 
-// Verificar si auth-middleware.js se cargó correctamente
+// Verificar si auth-middleware.js se cargó
 if (typeof AuthMiddleware === 'undefined') {
-    console.error('❌ ERROR: AuthMiddleware no está definido');
-    console.error('❌ Verifica que auth-middleware.js se esté cargando en login.html');
+    console.error('❌ ERROR CRÍTICO: AuthMiddleware no está definido');
+    console.error('❌ Razón: auth-middleware.js no se cargó o hay error');
+    console.error('❌ Verifica que login.html tenga:');
+    console.error('❌ <script src="/js/auth-middleware.js"></script>');
+    console.error('❌ ANTES de <script src="/js/login.js"></script>');
 } else {
     console.log('✅ AuthMiddleware cargado correctamente');
+    console.log('🔍 Verificando si ya está autenticado...');
+    
+    // Verificar si YA está autenticado
+    const token = sessionStorage.getItem('authToken');
+    const userData = sessionStorage.getItem('userData');
+    
+    if (token && userData) {
+        console.log('🔄 login.js: Usuario YA autenticado, redirigiendo a /dashboard');
+        console.log('🔑 Token encontrado:', token.substring(0, 20) + '...');
+        window.location.href = '/dashboard';
+    } else {
+        console.log('✅ login.js: Usuario NO autenticado, mostrar formulario');
+    }
 }
 
+// Mostrar/ocultar contraseña
+togglePassword.addEventListener('click', function() {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    this.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+});
+
+// Manejar login
+loginForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
     
-
-        // Manejar login
-        loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            
-            // Validaciones
-            if (!username || !password) {
-                showAlert('Por favor, complete todos los campos', 'error');
-                return;
-            }
-            
-            if (username.length < 3) {
-                showAlert('El usuario debe tener al menos 3 caracteres', 'error');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showAlert('La contraseña debe tener al menos 6 caracteres', 'error');
-                return;
-            }
-            
-            // Mostrar estado de carga
-            setLoading(true);
-            showAlert('Verificando credenciales...', 'info');
-            
-            try {
-                // Intentar autenticación con el servidor
-                const response = await fetch(`${API_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        username, 
-                        password 
-                    }),
-                    // Timeout de 10 segundos
-                    signal: AbortSignal.timeout(10000)
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok && data.success) {
-                    // Login exitoso
-                    showAlert(' Autenticación exitosa', 'success');
-                    
-                    // Guardar datos de sesión en SESSIONSTORAGE (se borra al cerrar pestaña)
-                    sessionStorage.setItem('authToken', data.token);
-                    sessionStorage.setItem('userData', JSON.stringify(data.user));
-                    sessionStorage.setItem('lastLogin', new Date().toISOString());
-                    console.log("token: ", data.token);
-                    
-                    // Registrar login exitoso
-                    console.log(`Login exitoso: ${data.user.username} (${data.user.role})`);
-                    
-                    // Redirigir después de 1 segundo
-                    setTimeout(() => {
-                        window.location.href = '/dashboard';
-                    }, 1000);
-                } else {
-                    // Login fallido
-                    const errorMsg = data.error || 'Credenciales incorrectas';
-                    
-                    showAlert(` ${errorMsg}`, 'error');
-                    passwordInput.focus();
-                    
-                    // Registrar intento fallido
-                    console.warn(`Intento fallido de login: ${username}`);
-                }
-                
-            } catch (error) {
-                // Error de red o timeout
-                console.error('Error de conexión:', error);
-                
-                if (error.name === 'TimeoutError' || error.name === 'AbortError') {
-                    showAlert('Tiempo de espera agotado. El servidor no responde.', 'error');
-                } else if (error.name === 'TypeError') {
-                    showAlert('Error de conexión. Verifique su conexión a internet.', 'error');
-                } else {
-                    showAlert('Error inesperado. Contacte al administrador.', 'error');
-                }
-                
-            } finally {
-                setLoading(false);
-            }
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    
+    // Validaciones
+    if (!username || !password) {
+        showAlert('Por favor, complete todos los campos', 'error');
+        return;
+    }
+    
+    if (username.length < 3) {
+        showAlert('El usuario debe tener al menos 3 caracteres', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showAlert('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+    }
+    
+    // Mostrar estado de carga
+    setLoading(true);
+    showAlert('Verificando credenciales...', 'info');
+    
+    try {
+        console.log('🔐 Enviando credenciales a:', `${API_URL}/auth/login`);
+        console.log('👤 Usuario:', username);
+        
+        // Intentar autenticación con el servidor
+        const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                username, 
+                password 
+            }),
+            signal: AbortSignal.timeout(10000)
         });
-
-        // Funciones auxiliares
-        function showAlert(message, type = 'error') {
-            alertMessage.textContent = message;
-            alertMessage.className = `alert alert-${type}`;
-            alertMessage.style.display = 'block';
+        
+        console.log('📥 Respuesta recibida, status:', response.status);
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            // Login exitoso
+            console.log('✅ Login exitoso para:', data.user.username);
+            console.log('🔑 Token recibido:', data.token.substring(0, 20) + '...');
             
-            // Auto-ocultar después de tiempo
-            const hideTime = type === 'success' ? 2000 : 5000;
+            showAlert('✓ Autenticación exitosa', 'success');
+            
+            // Guardar datos de sesión en SESSIONSTORAGE
+            sessionStorage.setItem('authToken', data.token);
+            sessionStorage.setItem('userData', JSON.stringify(data.user));
+            sessionStorage.setItem('lastLogin', new Date().toISOString());
+            
+            console.log('💾 Datos guardados en sessionStorage:');
+            console.log('  - authToken:', sessionStorage.getItem('authToken') ? 'GUARDADO' : 'ERROR');
+            console.log('  - userData:', sessionStorage.getItem('userData') ? 'GUARDADO' : 'ERROR');
+            
+            // Verificar que realmente se guardó
+            const tokenGuardado = sessionStorage.getItem('authToken');
+            if (!tokenGuardado || tokenGuardado !== data.token) {
+                console.error('❌ ERROR: Token NO se guardó correctamente en sessionStorage');
+                showAlert('Error guardando sesión', 'error');
+                return;
+            }
+            
+            console.log('🔄 Redirigiendo a /dashboard en 1 segundo...');
+            
+            // Redirigir después de 1 segundo
             setTimeout(() => {
-                if (alertMessage.textContent === message) {
-                    alertMessage.style.display = 'none';
-                }
-            }, hideTime);
+                console.log('🚀 Redirección ejecutándose...');
+                window.location.href = '/dashboard';
+            }, 1000);
+            
+        } else {
+            // Login fallido
+            const errorMsg = data.error || 'Credenciales incorrectas';
+            console.log('❌ Login fallido:', errorMsg);
+            
+            showAlert(`✗ ${errorMsg}`, 'error');
+            passwordInput.focus();
+            
+            // Limpiar campos por seguridad
+            document.getElementById('password').value = '';
         }
-
-
-        function setLoading(isLoading) {
-            if (isLoading) {
-                loginBtn.disabled = true;
-                btnText.style.display = 'none';
-                btnLoader.style.display = 'block';
-            } else {
-                loginBtn.disabled = false;
-                btnText.style.display = 'block';
-                btnLoader.style.display = 'none';
-            }
+        
+    } catch (error) {
+        // Error de red o timeout
+        console.error('❌ Error de conexión:', error);
+        
+        if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+            showAlert('⏱️ Tiempo de espera agotado', 'error');
+        } else if (error.name === 'TypeError') {
+            showAlert('🌐 Error de conexión', 'error');
+        } else {
+            showAlert('⚠️ Error inesperado', 'error');
         }
+        
+    } finally {
+        setLoading(false);
+    }
+});
 
-        // Prevenir múltiples envíos
-        let isSubmitting = false;
-        loginForm.addEventListener('submit', function(e) {
-            if (isSubmitting) {
-                e.preventDefault();
-                return;
-            }
-            isSubmitting = true;
-            setTimeout(() => { isSubmitting = false; }, 2000);
-        });
+// Funciones auxiliares
+function showAlert(message, type = 'error') {
+    alertMessage.textContent = message;
+    alertMessage.className = `alert alert-${type}`;
+    alertMessage.style.display = 'block';
+    
+    const hideTime = type === 'success' ? 2000 : 5000;
+    setTimeout(() => {
+        if (alertMessage.textContent === message) {
+            alertMessage.style.display = 'none';
+        }
+    }, hideTime);
+}
 
-        // Auto-focus en campo de usuario
-        window.addEventListener('load', () => {
-            document.getElementById('username').focus();
-        });
+function setLoading(isLoading) {
+    if (isLoading) {
+        loginBtn.disabled = true;
+        btnText.style.display = 'none';
+        btnLoader.style.display = 'block';
+    } else {
+        loginBtn.disabled = false;
+        btnText.style.display = 'block';
+        btnLoader.style.display = 'none';
+    }
+}
 
-        // Limpiar mensajes al empezar a escribir
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', () => {
-                if (alertMessage.style.display === 'block') {
-                    alertMessage.style.display = 'none';
-                }
-            });
-        });
+// Prevenir múltiples envíos
+let isSubmitting = false;
+loginForm.addEventListener('submit', function(e) {
+    if (isSubmitting) {
+        e.preventDefault();
+        return;
+    }
+    isSubmitting = true;
+    setTimeout(() => { isSubmitting = false; }, 2000);
+});
+
+// Auto-focus en campo de usuario
+window.addEventListener('DOMContentLoaded', function() {
+    console.log('🎯 login.js: DOMContentLoaded - Enfocando campo usuario');
+    document.getElementById('username').focus();
+});
+
+// Limpiar mensajes al empezar a escribir
+document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', () => {
+        if (alertMessage.style.display === 'block') {
+            alertMessage.style.display = 'none';
+        }
+    });
+});
+
+// ========== VERIFICACIÓN DE SESSIONSTORAGE ==========
+// Función para verificar sessionStorage
+function verificarSessionStorage() {
+    console.log('🔍 Verificando sessionStorage:');
+    console.log('  - Soporte sessionStorage:', typeof sessionStorage !== 'undefined' ? 'SÍ' : 'NO');
+    console.log('  - authToken:', sessionStorage.getItem('authToken') ? 'EXISTE' : 'NO EXISTE');
+    console.log('  - userData:', sessionStorage.getItem('userData') ? 'EXISTE' : 'NO EXISTE');
+    
+    // Probar escritura/lectura
+    try {
+        const testKey = '__test_login_' + Date.now();
+        sessionStorage.setItem(testKey, 'test_value');
+        const readValue = sessionStorage.getItem(testKey);
+        sessionStorage.removeItem(testKey);
+        
+        console.log('  - Lectura/escritura funcional:', readValue === 'test_value' ? 'SÍ' : 'NO');
+    } catch (error) {
+        console.error('  - ERROR sessionStorage:', error);
+    }
+}
+
+// Ejecutar verificación al cargar
+window.addEventListener('DOMContentLoaded', verificarSessionStorage);
+
+// ========== FIX PARA RENDER (URL sin barra) ==========
+// Si estamos en la raíz sin barra, asegurar redirección
+(function() {
+    const currentUrl = window.location.href;
+    const origin = window.location.origin;
+    
+    // Si estamos en la raíz SIN barra (https://simona-9e42.onrender.com)
+    if (currentUrl === origin) {
+        console.log('⚠️  Detectado: URL raíz sin barra (/), verificando...');
+        
+        // Si NO tenemos token y estamos en raíz sin barra → todo OK
+        const token = sessionStorage.getItem('authToken');
+        if (!token) {
+            console.log('✅ Usuario no autenticado en raíz sin barra - mostrar login');
+        } else {
+            console.log('🔄 Usuario autenticado en raíz sin barra, redirigiendo...');
+            window.location.href = '/dashboard';
+        }
+    }
+})();

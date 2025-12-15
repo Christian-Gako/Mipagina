@@ -1,6 +1,68 @@
 // public/script.js - VERSIÓN CORREGIDA CON AUTENTICACIÓN
+// Agrega esto al PRINCIPIO del archivo, ANTES de la clase:
+
+// ========== DETECCIÓN DE PÁGINA ACTUAL ==========
+(function() {
+    console.log('📊 script.js: Inicializando...');
+    
+    // Normalizar ruta - IMPORTANTE para Render.com
+    let currentPath = window.location.pathname;
+    const currentUrl = window.location.href;
+    const origin = window.location.origin;
+    
+    console.log('📍 URL completa:', currentUrl);
+    console.log('📍 Pathname original:', currentPath);
+    console.log('📍 Origin:', origin);
+    
+    // DETECTAR si estamos en la página de LOGIN (raíz)
+    // Render.com abre sin barra: https://simona-9e42.onrender.com
+    // Necesitamos detectar ambos casos: con y sin barra
+    const isLoginPage = 
+        currentPath === '/' || 
+        currentPath === '' || 
+        currentUrl === origin || 
+        currentUrl === origin + '/';
+    
+    console.log('📄 ¿Es página de login?:', isLoginPage ? 'SÍ' : 'NO');
+    
+    // SI estamos en LOGIN PAGE → NO EJECUTAR NADA de script.js
+    if (isLoginPage) {
+        console.log('⏸️ script.js: DETECTADO LOGIN PAGE - DETENIENDO EJECUCIÓN COMPLETA');
+        console.log('⏸️ script.js: Login no necesita funcionalidades del dashboard');
+        
+        // 1. Sobrescribir DOMContentLoaded para que NO haga nada
+        const originalAddEventListener = document.addEventListener;
+        document.addEventListener = function(type, listener, options) {
+            if (type === 'DOMContentLoaded') {
+                console.log('⏸️ script.js: BLOQUEADO DOMContentLoaded para login');
+                return; // NO ejecutar el listener
+            }
+            return originalAddEventListener.call(this, type, listener, options);
+        };
+        
+        // 2. Evitar que se cree la instancia de SistemaCisterna
+        // Simplemente no hacer nada más
+        window.__scriptJsDisabled = true;
+        
+        // 3. SALIR de la ejecución de script.js
+        // No crear la clase, no hacer nada
+        // Usamos un throw controlado para detener la ejecución
+        console.log('⏸️ script.js: Ejecución finalizada para login page');
+        return;
+    }
+    
+    console.log('✅ script.js: Continuando ejecución para página protegida');
+})();
+
+// ========== CLASE SISTEMA CISTERNA ==========
 class SistemaCisterna {
     constructor() {
+        // Verificar si script.js fue deshabilitado (para login)
+        if (window.__scriptJsDisabled) {
+            console.log('⏸️ SistemaCisterna: Constructor bloqueado (login page)');
+            return;
+        }
+        
         // Elementos que pueden estar en cualquier página
         this.alertsList = document.getElementById('alertsList');
         this.lastRefreshElement = document.getElementById('lastRefresh');
@@ -19,9 +81,17 @@ class SistemaCisterna {
     }
 
     init() {
+        // Verificar si script.js fue deshabilitado
+        if (window.__scriptJsDisabled) {
+            console.log('⏸️ SistemaCisterna.init(): Bloqueado (login page)');
+            return;
+        }
+        
+        console.log('🔐 SistemaCisterna: Verificando autenticación...');
+        
         // 1. Verificar autenticación
         if (!this.checkAuthentication()) {
-            console.log('Usuario no autenticado, redirigiendo...');
+            console.log('❌ SistemaCisterna: Usuario no autenticado');
             return;
         }
         
@@ -37,6 +107,10 @@ class SistemaCisterna {
 
     checkAuthentication() {
         // Verificar si está autenticado usando el middleware
+        if (typeof AuthMiddleware === 'undefined') {
+            console.error('❌ AuthMiddleware no está definido');
+            return false;
+        }
         return AuthMiddleware.isAuthenticated();
     }
 
@@ -45,7 +119,7 @@ class SistemaCisterna {
         this.userData = AuthMiddleware.getUser();
         this.authToken = AuthMiddleware.getToken();
         
-        console.log('Usuario cargado:', this.userData?.username);
+        console.log('✅ SistemaCisterna: Usuario cargado:', this.userData?.username);
         
         // Mostrar nombre de usuario si hay elemento para ello
         this.showUserName();
@@ -84,21 +158,21 @@ class SistemaCisterna {
                 
                 // Si la respuesta es 401 o 403, hacer logout
                 if (response.status === 401 || response.status === 403) {
-                    console.log('Token inválido o expirado, redirigiendo...');
+                    console.log('🔐 Token inválido o expirado, redirigiendo...');
                     AuthMiddleware.redirectToLogin();
                     return response;
                 }
                 
                 return response;
             } catch (error) {
-                console.error('Error en petición:', error);
+                console.error('❌ Error en petición:', error);
                 throw error;
             }
         };
     }
 
     continueInitialization() {
-        // Solo ejecutar después de verificar autenticación
+        console.log('🚀 SistemaCisterna: Inicializando funcionalidades...');
         
         // Cargar configuración en el dashboard
         this.cargarConfiguracionEnDashboard();
@@ -111,10 +185,11 @@ class SistemaCisterna {
         
         // Si estamos en el dashboard, actualizar datos específicos
         if (this.isDashboardPage()) {
+            console.log('📊 SistemaCisterna: Dashboard detectado, actualizando cada 10s');
             this.updateDashboard();
             setInterval(() => this.updateDashboard(), 10000);
         } else {
-            // En otras páginas, solo actualizar cada 10 segundos
+            console.log('📊 SistemaCisterna: Otra página, actualizando info común cada 10s');
             setInterval(() => this.updateCommonInfo(), 10000);
         }
         
@@ -129,13 +204,12 @@ class SistemaCisterna {
         // Verificar sesión cada minuto
         setInterval(() => {
             if (!AuthMiddleware.isAuthenticated()) {
-                console.log('Sesión expirada, redirigiendo...');
+                console.log('⏰ Sesión expirada, redirigiendo...');
                 AuthMiddleware.redirectToLogin();
             }
         }, 60000);
     }
 
-    // El resto de tus métodos existentes se mantienen igual...
     cargarConfiguracionEnDashboard() {
         if (!this.isDashboardPage()) return;
         
@@ -144,19 +218,14 @@ class SistemaCisterna {
         
         // Mapeo de campos de configuración a elementos HTML
         const mapeoCampos = {
-            // Datos de la Cisterna
             'cisternaNombre': 'config-cisternaNombre',
             'cisternaCapacidad': 'config-cisternaCapacidad',
             'cisternaUbicacion': 'config-cisternaUbicacion', 
             'cisternaMaterial': 'config-cisternaMaterial',
-            
-            // Datos del Sensor
             'sensorModelo': 'config-sensorModelo',
             'sensorID': 'config-sensorID',
             'sensorInstalacion': 'config-sensorInstalacion',
             'sensorPrecision': 'config-sensorPrecision',
-            
-            // Configuración del Sistema
             'frecuenciaMuestreo': 'config-frecuenciaMuestreo'
         };
         
@@ -173,17 +242,6 @@ class SistemaCisterna {
                     valor = `${Number(valor).toLocaleString()} litros`;
                 } else if (campoConfig === 'frecuenciaMuestreo') {
                     valor = this.formatearFrecuencia(valor);
-                } else if (campoConfig === 'sensorInstalacion' && valor) {
-                    // Formatear fecha de instalación
-                    if (valor.includes('-')) {
-                        // Si es formato YYYY-MM-DD
-                        const fecha = new Date(valor);
-                        valor = fecha.toLocaleDateString('es-MX', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric'
-                        }).replace(/ /g, ' ');
-                    }
                 }
                 
                 elemento.textContent = valor;
@@ -208,7 +266,6 @@ class SistemaCisterna {
 
     formatearFrecuencia(ms) {
         if (!ms) return 'Cada 10 segundos';
-
         const segundos = parseInt(ms) / 1000;
         if (segundos < 60) {
             return `Cada ${segundos} segundos`;
@@ -219,7 +276,6 @@ class SistemaCisterna {
     }
 
     escucharCambiosConfiguracion() {
-        // Escuchar evento personalizado desde config.js
         window.addEventListener('configuracionActualizada', () => {
             this.cargarConfiguracionEnDashboard();
         });
@@ -247,7 +303,7 @@ class SistemaCisterna {
             this.updateLastRefresh();
             
         } catch (error) {
-            console.error("Error obteniendo datos:", error);
+            console.error("❌ Error obteniendo datos:", error);
             this.showError();
         }
     }
@@ -263,7 +319,7 @@ class SistemaCisterna {
             this.updateLastRefresh();
             
         } catch (error) {
-            console.error("Error en dashboard:", error);
+            console.error("❌ Error en dashboard:", error);
             this.showError();
         }
     }
@@ -281,16 +337,10 @@ class SistemaCisterna {
         if (!this.statusElement) return;
         
         let status;
-        
-        if (level >= 80) {
-            status = "Lleno";
-        } else if (level >= 30) {
-            status = "Normal";
-        } else if (level >= 15) {
-            status = "Bajo";
-        } else {
-            status = "Crítico";
-        }
+        if (level >= 80) status = "Lleno";
+        else if (level >= 30) status = "Normal";
+        else if (level >= 15) status = "Bajo";
+        else status = "Crítico";
         
         this.statusElement.textContent = status;
     }
@@ -299,31 +349,14 @@ class SistemaCisterna {
         if (!this.alertsList) return;
         
         let alertHTML = '';
-        
         if (level <= 15) {
-            alertHTML = `
-                <div class="alert-item danger">
-                    ⚠️ Nivel crítico! Revisar suministro de agua
-                </div>
-            `;
+            alertHTML = `<div class="alert-item danger">⚠️ Nivel crítico!</div>`;
         } else if (level <= 30) {
-            alertHTML = `
-                <div class="alert-item warning">
-                    📉 Nivel bajo. Monitorear constantemente
-                </div>
-            `;
+            alertHTML = `<div class="alert-item warning">📉 Nivel bajo</div>`;
         } else if (level >= 95) {
-            alertHTML = `
-                <div class="alert-item info">
-                    ✅ Cisterna casi llena
-                </div>
-            `;
+            alertHTML = `<div class="alert-item info">✅ Cisterna casi llena</div>`;
         } else {
-            alertHTML = `
-                <div class="alert-item info">
-                    ✅ Sistema funcionando normalmente
-                </div>
-            `;
+            alertHTML = `<div class="alert-item info">✅ Sistema normal</div>`;
         }
         
         this.alertsList.innerHTML = alertHTML;
@@ -331,35 +364,54 @@ class SistemaCisterna {
 
     updateLastRefresh() {
         if (this.lastRefreshElement) {
-            const now = new Date();
-            this.lastRefreshElement.textContent = now.toLocaleString();
+            this.lastRefreshElement.textContent = new Date().toLocaleString();
         }
     }
 
     showError() {
-        if (this.percentageElement) {
-            this.percentageElement.textContent = 'Error';
-        }
-        if (this.statusElement) {
-            this.statusElement.textContent = 'Error';
-        }
+        if (this.percentageElement) this.percentageElement.textContent = 'Error';
+        if (this.statusElement) this.statusElement.textContent = 'Error';
         if (this.alertsList) {
-            this.alertsList.innerHTML = `
-                <div class="alert-item danger">
-                    ❌ Error de conexión con el servidor
-                </div>
-            `;
+            this.alertsList.innerHTML = `<div class="alert-item danger">❌ Error de conexión</div>`;
         }
     }
 }
 
-// Inicialización simplificada
-document.addEventListener('DOMContentLoaded', function() {
-    // Solo crear la instancia si está autenticado
-    if (!AuthMiddleware.protectPage()) {
+// ========== INICIALIZACIÓN FINAL ==========
+// SOLO ejecutar si NO estamos en login page
+(function() {
+    // Verificar nuevamente si estamos en login (por seguridad)
+    const currentPath = window.location.pathname;
+    const currentUrl = window.location.href;
+    const origin = window.location.origin;
+    
+    const isLoginPage = 
+        currentPath === '/' || 
+        currentPath === '' || 
+        currentUrl === origin || 
+        currentUrl === origin + '/';
+    
+    if (isLoginPage) {
+        console.log('⏸️ script.js: Login page detectada - NO inicializando');
         return;
     }
-        
-    new SistemaCisterna();
     
-});
+    // Solo inicializar en páginas protegidas
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📊 script.js: DOMContentLoaded en página protegida');
+        
+        // Verificar que AuthMiddleware exista
+        if (typeof AuthMiddleware === 'undefined') {
+            console.error('❌ ERROR: AuthMiddleware no definido');
+            return;
+        }
+        
+        // Usar protectPage() para verificar autenticación
+        if (AuthMiddleware.protectPage()) {
+            console.log('✅ script.js: Usuario autenticado, creando SistemaCisterna');
+            new SistemaCisterna();
+        } else {
+            console.log('⏸️ script.js: protectPage() retornó false');
+        }
+    });
+})();
