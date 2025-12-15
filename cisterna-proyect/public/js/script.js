@@ -358,5 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Solo crear la instancia si está autenticado
     if (AuthMiddleware.protectPage()) {
         new SistemaCisterna();
+    }else{
+        return;
     }
 });
