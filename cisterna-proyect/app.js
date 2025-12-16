@@ -20,11 +20,13 @@ app.use('/api/auth', authRoutes);
 const port = process.env.PORT;
 
 // ========== RUTAS PARA PÁGINAS ==========
-
 app.get('/diagnostico', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'diagnostico.html'));
 });
 app.get('/', (req, res) => {
+    res.redirect(302, '/login');
+});
+app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
