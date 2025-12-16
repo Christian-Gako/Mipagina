@@ -383,9 +383,6 @@ class SistemaCisterna {
     const origin = window.location.origin;
     
     const isLoginPage = 
-        currentPath === '/' || 
-        currentPath === '' || 
-        currentUrl === origin || 
         currentUrl === origin + '/';
     
     if (isLoginPage) {

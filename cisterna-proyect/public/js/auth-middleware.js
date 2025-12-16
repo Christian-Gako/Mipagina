@@ -103,11 +103,11 @@ class AuthMiddleware {
         console.log('🔒 [auth-middleware] protectPage() INICIANDO');
        
         const origin = window.location.origin;
-        
+        const currentUrl = window.location.href;
         const isLoginPage = 
+
             currentUrl === origin + '/';
         
-        console.log('📄 ¿Es página de login?:', isLoginPage ? 'SÍ' : 'NO');
         
         const token = sessionStorage.getItem('authToken');
         const userData = sessionStorage.getItem('userData');

@@ -15,30 +15,6 @@ console.log('📄 login.js: Inicializando...');
 console.log('📍 URL actual:', window.location.href);
 console.log('📍 Pathname:', window.location.pathname);
 
-// Verificar si auth-middleware.js se cargó
-if (typeof AuthMiddleware === 'undefined') {
-    console.error('❌ ERROR CRÍTICO: AuthMiddleware no está definido');
-    console.error('❌ Razón: auth-middleware.js no se cargó o hay error');
-    console.error('❌ Verifica que login.html tenga:');
-    console.error('❌ <script src="/js/auth-middleware.js"></script>');
-    console.error('❌ ANTES de <script src="/js/login.js"></script>');
-} else {
-    console.log('✅ AuthMiddleware cargado correctamente');
-    console.log('🔍 Verificando si ya está autenticado...');
-    
-    // Verificar si YA está autenticado
-    const token = sessionStorage.getItem('authToken');
-    const userData = sessionStorage.getItem('userData');
-    
-    if (token && userData) {
-        console.log('🔄 login.js: Usuario YA autenticado, redirigiendo a /dashboard');
-        console.log('🔑 Token encontrado:', token.substring(0, 20) + '...');
-        //window.location.href = '/dashboard';
-    } else {
-        console.log('✅ login.js: Usuario NO autenticado, mostrar formulario');
-    }
-}
-
 // Mostrar/ocultar contraseña
 togglePassword.addEventListener('click', function() {
     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
@@ -273,7 +249,7 @@ window.addEventListener('DOMContentLoaded', verificarSessionStorage);
     const currentUrl = window.location.href;
     const origin = window.location.origin;
     
-    // Si estamos en la raíz SIN barra (https://simona-9e42.onrender.com)
+    
     if (currentUrl === origin) {
         console.log('⚠️  Detectado: URL raíz sin barra (/), verificando...');
         
