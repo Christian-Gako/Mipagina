@@ -23,9 +23,6 @@ const port = process.env.PORT;
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
-app.get('', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
 
 app.get('/historial', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'historial.html'));

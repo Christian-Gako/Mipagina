@@ -1,58 +1,55 @@
 // public/script.js - VERSIÓN CORREGIDA CON AUTENTICACIÓN
-// Agrega esto al PRINCIPIO del archivo, ANTES de la clase:
-
-// ========== DETECCIÓN DE PÁGINA ACTUAL ==========
+// EN LA PRIMERA LÍNEA de script.js, agrega:
 (function() {
-    console.log('📊 script.js: Inicializando...');
+    console.log('🛡️ script.js: Verificación de emergencia INICIANDO');
     
-    // Normalizar ruta - IMPORTANTE para Render.com
-    let currentPath = window.location.pathname;
-    const currentUrl = window.location.href;
-    const origin = window.location.origin;
+    // DETECTAR si estamos en login.html
+    // Verificar por elementos ÚNICOS de login.html
+    const tieneFormularioLogin = document.getElementById('loginForm') !== null;
+    const tieneInputUsuario = document.getElementById('username') !== null;
+    const esLoginPage = window.location.pathname === '/' || 
+                       window.location.pathname === '' ||
+                       window.location.href === window.location.origin ||
+                       window.location.href === window.location.origin + '/';
     
-    console.log('📍 URL completa:', currentUrl);
-    console.log('📍 Pathname original:', currentPath);
-    console.log('📍 Origin:', origin);
+    console.log('🔍 Detección login:');
+    console.log('  - Formulario login:', tieneFormularioLogin ? 'SÍ' : 'NO');
+    console.log('  - Input usuario:', tieneInputUsuario ? 'SÍ' : 'NO');
+    console.log('  - Es ruta raíz:', esLoginPage ? 'SÍ' : 'NO');
     
-    // DETECTAR si estamos en la página de LOGIN (raíz)
-    // Render.com abre sin barra: https://simona-9e42.onrender.com
-    // Necesitamos detectar ambos casos: con y sin barra
-    const isLoginPage = 
-        currentPath === '/' || 
-        currentPath === '' || 
-        currentUrl === origin || 
-        currentUrl === origin + '/';
-    
-    console.log('📄 ¿Es página de login?:', isLoginPage ? 'SÍ' : 'NO');
-    
-    // SI estamos en LOGIN PAGE → NO EJECUTAR NADA de script.js
-    if (isLoginPage) {
-        console.log('⏸️ script.js: DETECTADO LOGIN PAGE - DETENIENDO EJECUCIÓN COMPLETA');
-        console.log('⏸️ script.js: Login no necesita funcionalidades del dashboard');
+    // SI es login page → NO EJECUTAR script.js
+    if (tieneFormularioLogin || tieneInputUsuario || esLoginPage) {
+        console.log('🚨 EMERGENCIA: script.js detectado en login page!');
+        console.log('⛔ DETENIENDO EJECUCIÓN COMPLETA de script.js');
         
-        // 1. Sobrescribir DOMContentLoaded para que NO haga nada
-        const originalAddEventListener = document.addEventListener;
-        document.addEventListener = function(type, listener, options) {
-            if (type === 'DOMContentLoaded') {
-                console.log('⏸️ script.js: BLOQUEADO DOMContentLoaded para login');
-                return; // NO ejecutar el listener
-            }
-            return originalAddEventListener.call(this, type, listener, options);
+        // 1. Deshabilitar completamente
+        window.__SCRIPT_JS_BLOQUEADO = true;
+        
+        // 2. Sobrescribir TODO para que no haga nada
+        window.SistemaCisterna = function() {
+            console.log('⛔ SistemaCisterna BLOQUEADO - login page');
+            return { init: function() {} };
         };
         
-        // 2. Evitar que se cree la instancia de SistemaCisterna
-        // Simplemente no hacer nada más
-        window.__scriptJsDisabled = true;
+        // 3. Sobrescribir DOMContentLoaded
+        const originalAdd = document.addEventListener;
+        document.addEventListener = function(type, listener) {
+            if (type === 'DOMContentLoaded') {
+                console.log('⛔ DOMContentLoaded BLOQUEADO');
+                return;
+            }
+            return originalAdd.apply(this, arguments);
+        };
         
-        // 3. SALIR de la ejecución de script.js
-        // No crear la clase, no hacer nada
-        // Usamos un throw controlado para detener la ejecución
-        console.log('⏸️ script.js: Ejecución finalizada para login page');
-        return;
+        // 4. SALIR completamente
+        // No crear clase, no hacer nada
+        throw new Error('script.js bloqueado - página de login');
     }
     
-    console.log('✅ script.js: Continuando ejecución para página protegida');
+    console.log('✅ script.js: Página protegida detectada, continuando...');
 })();
+
+// LUEGO el resto de tu script.js normal...
 
 // ========== CLASE SISTEMA CISTERNA ==========
 class SistemaCisterna {

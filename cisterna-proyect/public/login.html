@@ -159,5 +159,27 @@ if (esLoginPage) {
     </script>
     <script src="/js/auth-middleware.js"></script>
     <script src="/js/login.js"></script>
+    <!-- En login.html, AL FINAL (después de todos los scripts): -->
+<script>
+// VERIFICACIÓN FINAL: ¿Qué scripts se ejecutaron?
+console.log('🔍 VERIFICACIÓN FINAL DE EJECUCIÓN:');
+console.log('  - AuthMiddleware definido?:', typeof AuthMiddleware !== 'undefined' ? '✅ SÍ' : '❌ NO');
+console.log('  - SistemaCisterna definido?:', typeof SistemaCisterna !== 'undefined' ? '⚠️ SÍ (ERROR!)' : '✅ NO');
+console.log('  - script.js se ejecutó?:', window.__SCRIPT_JS_EJECUTADO ? '⚠️ SÍ (ERROR!)' : '✅ NO');
+
+// Si SistemaCisterna SE cargó (error), forzar recarga limpia
+if (typeof SistemaCisterna !== 'undefined') {
+    console.error('❌ ERROR CRÍTICO: SistemaCisterna se cargó en login!');
+    console.error('❌ Forzando recarga limpia...');
+    
+    // Limpiar sessionStorage por seguridad
+    sessionStorage.clear();
+    
+    // Redirigir a la raíz con parámetro para evitar cache
+    setTimeout(() => {
+        window.location.href = window.location.origin + '?nocache=' + Date.now();
+    }, 1000);
+}
+</script>
 </body>
 </html>
