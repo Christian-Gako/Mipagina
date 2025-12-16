@@ -146,7 +146,7 @@ class AuthMiddleware {
         console.log('🔀 Redirigiendo a LOGIN:', rootUrl);
         
         // Usar location.replace para evitar que quede en el historial
-        //window.location.replace(rootUrl);
+        window.location.replace(rootUrl);
     }
 }
 

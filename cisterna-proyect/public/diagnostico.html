@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 DIAGNÓSTICO - SIMONA</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a237e 0%, #4a148c 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        h1 {
+            color: #ff4081;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 0 0 10px rgba(255,64,129,0.5);
+        }
+        .status-box {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .success { border-left: 5px solid #4CAF50; }
+        .warning { border-left: 5px solid #FFC107; }
+        .error { border-left: 5px solid #F44336; }
+        .info { border-left: 5px solid #2196F3; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        button {
+            background: #ff4081;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #f50057;
+            transform: translateY(-2px);
+        }
+        
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-top: 20px;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        
+        .url-test {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .url-test a {
+            background: #2196F3;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .url-test a:hover {
+            background: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 DIAGNÓSTICO SIMONA - RUTA "/"</h1>
+        
+        <div class="status-box success">
+            <h2>✅ ESTA PÁGINA SE ESTÁ SIRVIENDO CORRECTAMENTE</h2>
+            <p>Si ves esto, significa que la ruta <code>/</code> está funcionando.</p>
+        </div>
+        
+        <div class="grid">
+            <div class="status-box info">
+                <h3>📊 INFORMACIÓN DEL CLIENTE</h3>
+                <div id="clientInfo">Cargando...</div>
+            </div>
+            
+            <div class="status-box info">
+                <h3>🌐 INFORMACIÓN DE LA URL</h3>
+                <div id="urlInfo">Cargando...</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🧪 PRUEBAS DE RUTAS</h3>
+            <div class="url-test">
+                <a href="/" target="_blank">Probar "/" (esta página)</a>
+                <a href="/login.html" target="_blank">Probar "/login.html"</a>
+                <a href="/dashboard" target="_blank">Probar "/dashboard"</a>
+                <a href="/js/auth-middleware.js" target="_blank">Probar "/js/auth-middleware.js"</a>
+                <a href="/api/level" target="_blank">Probar "/api/level"</a>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🛠️ ACCIONES DE DIAGNÓSTICO</h3>
+            <div>
+                <button onclick="clearStorage()">🗑️ Limpiar sessionStorage & localStorage</button>
+                <button onclick="reloadPage()">🔄 Recargar página</button>
+                <button onclick="forceLogin()">🔐 Forzar ir a login.html</button>
+                <button onclick="testAPI()">🧪 Probar API /api/level</button>
+            </div>
+        </div>
+        
+        <div class="status-box warning">
+            <h3>📝 LOGS EN TIEMPO REAL</h3>
+            <div class="log" id="liveLog"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔍 DETECCIÓN DE ARCHIVOS</h3>
+            <div id="fileDetection">Verificando...</div>
+        </div>
+    </div>
+
+    <script>
+        // ========== LOGGING ==========
+        const log = document.getElementById('liveLog');
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = {
+                'info': '#2196F3',
+                'success': '#4CAF50',
+                'warning': '#FFC107',
+                'error': '#F44336'
+            }[type];
+            
+            log.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // ========== INFORMACIÓN INICIAL ==========
+        function updateInfo() {
+            // Información del cliente
+            document.getElementById('clientInfo').innerHTML = `
+                <strong>Navegador:</strong> ${navigator.userAgent.substring(0, 50)}...<br>
+                <strong>Online:</strong> ${navigator.onLine ? '✅ Sí' : '❌ No'}<br>
+                <strong>Cookies habilitadas:</strong> ${navigator.cookieEnabled ? '✅ Sí' : '❌ No'}<br>
+                <strong>sessionStorage:</strong> ${typeof sessionStorage !== 'undefined' ? '✅ Disponible' : '❌ No disponible'}<br>
+                <strong>localStorage:</strong> ${typeof localStorage !== 'undefined' ? '✅ Disponible' : '❌ No disponible'}
+            `;
+
+            // Información de URL
+            document.getElementById('urlInfo').innerHTML = `
+                <strong>URL completa:</strong> ${window.location.href}<br>
+                <strong>Protocolo:</strong> ${window.location.protocol}<br>
+                <strong>Host:</strong> ${window.location.host}<br>
+                <strong>Pathname:</strong> <code>${window.location.pathname}</code><br>
+                <strong>Hash:</strong> ${window.location.hash || '(vacío)'}<br>
+                <strong>Search:</strong> ${window.location.search || '(vacío)'}
+            `;
+            
+            addLog('Información del cliente actualizada', 'success');
+        }
+
+        // ========== FUNCIONES DE DIAGNÓSTICO ==========
+        function clearStorage() {
+            sessionStorage.clear();
+            localStorage.clear();
+            addLog('✅ sessionStorage y localStorage limpiados', 'success');
+            updateInfo();
+        }
+
+        function reloadPage() {
+            addLog('🔄 Recargando página...', 'warning');
+            setTimeout(() => location.reload(), 1000);
+        }
+
+        function forceLogin() {
+            addLog('🔐 Redirigiendo a /login.html', 'warning');
+            window.location.href = '/login.html';
+        }
+
+        function testAPI() {
+            addLog('🧪 Probando API /api/level...', 'info');
+            fetch('/api/level')
+                .then(response => {
+                    addLog(`📡 Respuesta: ${response.status} ${response.statusText}`, 'info');
+                    return response.json();
+                })
+                .then(data => {
+                    addLog(`📊 Datos recibidos: ${JSON.stringify(data)}`, 'success');
+                })
+                .catch(error => {
+                    addLog(`❌ Error: ${error.message}`, 'error');
+                });
+        }
+
+        // ========== DETECCIÓN DE ARCHIVOS ==========
+        function detectFiles() {
+            const filesToCheck = [
+                '/login.html',
+                '/js/auth-middleware.js',
+                '/js/login.js',
+                '/js/script.js',
+                '/style.css',
+                '/loginstyle.css'
+            ];
+            
+            let detectionHTML = '';
+            
+            filesToCheck.forEach(file => {
+                fetch(file, { method: 'HEAD' })
+                    .then(response => {
+                        const status = response.status;
+                        detectionHTML += `
+                            <div style="margin: 5px 0; padding: 5px; background: ${status === 200 ? '#1B5E20' : '#B71C1C'}; border-radius: 3px;">
+                                <code>${file}</code>: ${status === 200 ? '✅ ENCONTRADO' : '❌ NO ENCONTRADO'} (${status})
+                            </div>
+                        `;
+                        document.getElementById('fileDetection').innerHTML = detectionHTML;
+                    })
+                    .catch(() => {
+                        detectionHTML += `
+                            <div style="margin: 5px 0; padding: 5px; background: #B71C1C; border-radius: 3px;">
+                                <code>${file}</code>: ❌ ERROR DE RED
+                            </div>
+                        `;
+                        document.getElementById('fileDetection').innerHTML = detectionHTML;
+                    });
+            });
+        }
+
+        // ========== DETECCIÓN DE REDIRECCIONES ==========
+        function monitorRedirects() {
+            // Bloquear redirecciones temporalmente para diagnóstico
+            const originalHref = Object.getOwnPropertyDescriptor(window.location, 'href');
+            Object.defineProperty(window.location, 'href', {
+                set: function(url) {
+                    addLog(`🚨 INTENTO DE REDIRECCIÓN DETECTADO: ${url}`, 'error');
+                    addLog('📋 Stack trace: ' + new Error().stack, 'warning');
+                    // No hacer la redirección - solo loguear
+                    return;
+                },
+                get: originalHref.get
+            });
+            
+            addLog('🛡️ Monitor de redirecciones activado', 'success');
+        }
+
+        // ========== INICIALIZACIÓN ==========
+        window.addEventListener('DOMContentLoaded', () => {
+            addLog('🚀 Página de diagnóstico cargada', 'success');
+            updateInfo();
+            detectFiles();
+            monitorRedirects();
+            
+            // Verificar si hay scripts ejecutándose
+            const scripts = Array.from(document.querySelectorAll('script[src]'));
+            addLog(`📦 Scripts cargados: ${scripts.length}`, 'info');
+            scripts.forEach(script => {
+                addLog(`   - ${script.src}`, 'info');
+            });
+            
+            // Verificar si hay sesión activa
+            const token = sessionStorage.getItem('authToken');
+            if (token) {
+                addLog(`🔑 TOKEN ENCONTRADO en sessionStorage (${token.length} chars)`, 'warning');
+                addLog(`   Primeros 20 chars: ${token.substring(0, 20)}...`, 'warning');
+            } else {
+                addLog('🔒 NO hay token en sessionStorage', 'success');
+            }
+        });
+
+        // ========== AUTO-ACTUALIZACIÓN ==========
+        setInterval(updateInfo, 5000);
+        setInterval(() => {
+            addLog('⏰ Ping: Página activa', 'info');
+        }, 30000);
+    </script>
+</body>
+</html>

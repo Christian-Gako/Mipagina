@@ -10,11 +10,6 @@ const alertMessage = document.getElementById('alertMessage');
 const togglePassword = document.getElementById('togglePassword');
 const passwordInput = document.getElementById('password');
 
-// ========== VERIFICACIÓN INICIAL ==========
-console.log('📄 login.js: Inicializando...');
-console.log('📍 URL actual:', window.location.href);
-console.log('📍 Pathname:', window.location.pathname);
-
 // Mostrar/ocultar contraseña
 togglePassword.addEventListener('click', function() {
     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
@@ -50,8 +45,6 @@ loginForm.addEventListener('submit', async function(e) {
     showAlert('Verificando credenciales...', 'info');
     
     try {
-        console.log('🔐 Enviando credenciales a:', `${API_URL}/auth/login`);
-        console.log('👤 Usuario:', username);
         
         // Intentar autenticación con el servidor
         const response = await fetch(`${API_URL}/auth/login`, {
@@ -70,9 +63,6 @@ loginForm.addEventListener('submit', async function(e) {
         const data = await response.json();
         
         if (response.ok && data.success) {
-            // Login exitoso
-            console.log('✅ Login exitoso para:', data.user.username);
-            console.log('🔑 Token recibido:');
             
             showAlert('✓ Autenticación exitosa', 'success');
             
@@ -239,27 +229,3 @@ function verificarDOM() {
 
 // Ejecutar verificación inmediatamente
 verificarDOM();
-
-// Ejecutar verificación al cargar
-window.addEventListener('DOMContentLoaded', verificarSessionStorage);
-
-// ========== FIX PARA RENDER (URL sin barra) ==========
-// Si estamos en la raíz sin barra, asegurar redirección
-(function() {
-    const currentUrl = window.location.href;
-    const origin = window.location.origin;
-    
-    
-    if (currentUrl === origin) {
-        console.log('⚠️  Detectado: URL raíz sin barra (/), verificando...');
-        
-        // Si NO tenemos token y estamos en raíz sin barra → todo OK
-        const token = sessionStorage.getItem('authToken');
-        if (!token) {
-            console.log('✅ Usuario no autenticado en raíz sin barra - mostrar login');
-        } else {
-            console.log('🔄 Usuario autenticado en raíz sin barra, redirigiendo...');
-            window.location.href = '/dashboard';
-        }
-    }
-})();
