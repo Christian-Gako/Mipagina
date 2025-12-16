@@ -1,6 +1,6 @@
 // auth-middleware.js
 class AuthMiddleware {
-    static API_URL = 'https://simona-9e42.onrender.com/api';
+    static API_URL = 'https://simona-abno.onrender.com/api';
 
     // Verificar si el usuario está autenticado (solo local)
     static isAuthenticated() {

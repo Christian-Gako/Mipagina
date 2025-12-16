@@ -1,5 +1,5 @@
 // login.js - VERSIÓN CORREGIDA
-const API_URL = 'https://simona-9e42.onrender.com/api';
+const API_URL = 'https://simona-abno.onrender.com/api';
 
 // Elementos del DOM
 const loginForm = document.getElementById('loginForm');
