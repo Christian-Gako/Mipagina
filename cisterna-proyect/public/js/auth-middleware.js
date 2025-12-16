@@ -1,4 +1,4 @@
-// auth-middleware.js - VERSIÓN FINAL CORREGIDA PARA RENDER
+// auth-middleware.js
 class AuthMiddleware {
     static API_URL = 'https://simona-9e42.onrender.com/api';
 
@@ -101,22 +101,10 @@ class AuthMiddleware {
     // ========== FUNCIÓN PROTECTPAGE() CORREGIDA ==========
     static protectPage() {
         console.log('🔒 [auth-middleware] protectPage() INICIANDO');
-        
-        // 1. DETECTAR PÁGINA ACTUAL (Render abre sin barra)
-        const currentUrl = window.location.href;
-        const currentPath = window.location.pathname;
+       
         const origin = window.location.origin;
         
-        console.log('📍 URL completa:', currentUrl);
-        console.log('📍 Pathname:', currentPath);
-        console.log('📍 Origin:', origin);
-        
-        // ¿Estamos en la página de LOGIN? (con o sin barra)
-        // IMPORTANTE: Render abre https://simona-9e42.onrender.com (sin barra)
         const isLoginPage = 
-            currentPath === '/' || 
-            currentPath === '' || 
-            currentUrl === origin || 
             currentUrl === origin + '/';
         
         console.log('📄 ¿Es página de login?:', isLoginPage ? 'SÍ' : 'NO');
@@ -124,26 +112,19 @@ class AuthMiddleware {
         const token = sessionStorage.getItem('authToken');
         const userData = sessionStorage.getItem('userData');
         
-        console.log('🔑 Token en sessionStorage:', token ? 'SÍ (' + token.substring(0, 10) + '...)' : 'NO');
-        console.log('👤 UserData en sessionStorage:', userData ? 'SÍ' : 'NO');
-        
         // 2. SI ESTAMOS EN LOGIN PAGE
         if (isLoginPage) {
-            console.log('📄 Detectado: Estamos en LOGIN PAGE');
             
             // Si YA está autenticado → REDIRIGIR a DASHBOARD
             if (token && userData) {
                 console.log('🔄 Usuario YA autenticado, redirigiendo a DASHBOARD');
-                window.location.href = '/dashboard';
+                //window.location.href = '/dashboard';
                 return false; // No permitir acceso al login
             }
             
             console.log('✅ Mostrar formulario de login (usuario no autenticado)');
             return true; // Permitir acceso al login
         }
-        
-        // 3. SI ESTAMOS EN CUALQUIER OTRA PÁGINA
-        console.log('🏠 Detectado: Estamos en página PROTEGIDA');
         
         // Si NO está autenticado → REDIRIGIR a LOGIN
         if (!token || !userData) {
@@ -159,17 +140,13 @@ class AuthMiddleware {
 
     // ========== FUNCIÓN REDIRECTTOLOGIN() CORREGIDA ==========
     static redirectToLogin() {
-        console.log('🔄 redirectToLogin() ejecutándose...');
-        
         // Limpiar sesión primero
         this.clearSession();
-        
-        // Redirigir a la raíz (Render maneja con/sin barra)
-        const rootUrl = window.location.origin;
+        const rootUrl = window.location.origin + '/';
         console.log('🔀 Redirigiendo a LOGIN:', rootUrl);
         
         // Usar location.replace para evitar que quede en el historial
-        window.location.replace(rootUrl);
+        //window.location.replace(rootUrl);
     }
 }
 
@@ -177,8 +154,6 @@ class AuthMiddleware {
 (function() {
     // Solo ejecutar en navegador
     if (typeof window !== 'undefined') {
-        console.log('🔄 auth-middleware.js: Inicializando...');
-        
         // Verificar si ya está cargado
         if (!window.AuthMiddlewareInitialized) {
             console.log('✅ Configurando interceptor fetch...');
@@ -196,45 +171,6 @@ class AuthMiddleware {
     }
 })();
 
-// ========== FIX ESPECIAL PARA RENDER (URL sin barra) ==========
-(function() {
-    if (typeof window !== 'undefined') {
-        setTimeout(() => {
-            console.log('🔧 FIX para Render: Verificando URL...');
-            
-            const currentUrl = window.location.href;
-            const origin = window.location.origin;
-            const currentPath = window.location.pathname;
-            
-            // Caso 1: URL es exactamente la raíz SIN barra
-            // Ejemplo: https://simona-9e42.onrender.com
-            if (currentUrl === origin && currentPath === '') {
-                console.log('⚠️  Detectado: Render abrió URL sin barra');
-                console.log('ℹ️  Esto es normal, auth-middleware.js lo manejará');
-            }
-            
-            // Caso 2: Redirección de emergencia si hay problemas
-            const token = sessionStorage.getItem('authToken');
-            const userData = sessionStorage.getItem('userData');
-            
-            // REGLA DE EMERGENCIA: Si tenemos token pero estamos en raíz
-            if ((currentUrl === origin || currentPath === '/') && token && userData) {
-                console.log('🚨 EMERGENCIA: Token encontrado en raíz, redirigiendo...');
-                window.location.href = '/dashboard';
-            }
-            
-            // REGLA DE EMERGENCIA: Si NO tenemos token pero estamos en página protegida
-            const protectedPaths = ['/dashboard', '/historial', '/reportes', '/configuracion'];
-            const isProtectedPath = protectedPaths.some(path => currentPath.startsWith(path));
-            
-            if (isProtectedPath && (!token || !userData)) {
-                console.log('🚨 EMERGENCIA: No autenticado en página protegida');
-                console.log('🔄 Redirigiendo a raíz...');
-                window.location.replace(origin);
-            }
-        }, 200);
-    }
-})();
 
 // Exportar para que esté disponible globalmente
 if (typeof window !== 'undefined') {

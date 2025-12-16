@@ -33,7 +33,7 @@ if (typeof AuthMiddleware === 'undefined') {
     if (token && userData) {
         console.log('🔄 login.js: Usuario YA autenticado, redirigiendo a /dashboard');
         console.log('🔑 Token encontrado:', token.substring(0, 20) + '...');
-        window.location.href = '/dashboard';
+        //window.location.href = '/dashboard';
     } else {
         console.log('✅ login.js: Usuario NO autenticado, mostrar formulario');
     }
@@ -90,13 +90,13 @@ loginForm.addEventListener('submit', async function(e) {
             signal: AbortSignal.timeout(10000)
         });
         
-        console.log('📥 Respuesta recibida, status:', response.status);
+        
         const data = await response.json();
         
         if (response.ok && data.success) {
             // Login exitoso
             console.log('✅ Login exitoso para:', data.user.username);
-            console.log('🔑 Token recibido:', data.token.substring(0, 20) + '...');
+            console.log('🔑 Token recibido:');
             
             showAlert('✓ Autenticación exitosa', 'success');
             
@@ -123,7 +123,7 @@ loginForm.addEventListener('submit', async function(e) {
             setTimeout(() => {
                 console.log('🚀 Redirección ejecutándose...');
                 window.location.href = '/dashboard';
-            }, 1000);
+            }, 10000);
             
         } else {
             // Login fallido
@@ -193,7 +193,6 @@ loginForm.addEventListener('submit', function(e) {
 
 // Auto-focus en campo de usuario
 window.addEventListener('DOMContentLoaded', function() {
-    console.log('🎯 login.js: DOMContentLoaded - Enfocando campo usuario');
     document.getElementById('username').focus();
 });
 

@@ -22,20 +22,10 @@ const port = process.env.PORT;
 // ========== RUTAS PARA PÁGINAS ==========
 
 app.get('/', (req, res) => {
-    console.log('📄 Intentando servir login.html...');
-    const loginPath = path.join(__dirname, 'public', 'login.html');
-    console.log('📍 Ruta login.html:', loginPath);
-    
-    // Verificar si existe
-    const fs = require('fs');
-    if (fs.existsSync(loginPath)) {
-        console.log('✅ login.html EXISTE');
-        res.sendFile(loginPath);
-    } else {
-        console.log('❌ login.html NO EXISTE!');
-        console.log('📁 Archivos en public/:', fs.readdirSync(path.join(__dirname, 'public')));
-        res.status(404).send('login.html no encontrado');
-    }
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 app.get('/historial', (req, res) => {
@@ -583,7 +573,7 @@ app.get('/api/records/export', async (req, res) => {
 
 app.get('/test', (req, res) => {
     res.json({ 
-        message: '¡Servidor funcionando! 🚀',
+        message: '¡Servidor funcionando! ',
         mongodb: mongoose.connection.readyState === 1 ? 'Conectado' : 'No Conectado'});
 });
 
