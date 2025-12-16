@@ -21,10 +21,10 @@ const port = process.env.PORT;
 
 // ========== RUTAS PARA PÁGINAS ==========
 
-app.get('/', (req, res) => {
+app.get('/diagnostico', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'diagnostico.html'));
 });
-app.get('/login', (req, res) => {
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
