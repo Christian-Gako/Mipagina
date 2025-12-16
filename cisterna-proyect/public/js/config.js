@@ -52,6 +52,18 @@ class ConfiguracionManager {
             }
         });
     }
+    async cargarConfiguracion() {
+        try {
+            const response = await fetch('/api/configuracion');
+            if (!response.ok) throw new Error('Error del servidor');
+            
+            const config = await response.json();
+            this.llenarFormulario(config);
+            
+        } catch (error) {
+            throw new Error('No se pudo cargar configuración');
+        }
+    }
 
       async guardarConfiguracion(event) {
         event.preventDefault();
