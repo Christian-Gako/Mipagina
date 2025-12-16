@@ -20,8 +20,22 @@ app.use('/api/auth', authRoutes);
 const port = process.env.PORT;
 
 // ========== RUTAS PARA PÁGINAS ==========
+
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+    console.log('📄 Intentando servir login.html...');
+    const loginPath = path.join(__dirname, 'public', 'login.html');
+    console.log('📍 Ruta login.html:', loginPath);
+    
+    // Verificar si existe
+    const fs = require('fs');
+    if (fs.existsSync(loginPath)) {
+        console.log('✅ login.html EXISTE');
+        res.sendFile(loginPath);
+    } else {
+        console.log('❌ login.html NO EXISTE!');
+        console.log('📁 Archivos en public/:', fs.readdirSync(path.join(__dirname, 'public')));
+        res.status(404).send('login.html no encontrado');
+    }
 });
 
 app.get('/historial', (req, res) => {
