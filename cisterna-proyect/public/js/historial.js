@@ -144,7 +144,6 @@ async function cargarHistorial() {
         }
         
         if (!data.success) {
-            console.warn('API devolvió éxito=false:', data);
             // Continuar con datos vacíos si hay error
             data.records = data.records || [];
             data.pagination = data.pagination || { total: 0, totalPages: 0 };

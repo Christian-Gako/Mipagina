@@ -1,33 +1,16 @@
-// public/script.js - VERSIÓN CORREGIDA CON AUTENTICACIÓN
-// EN LA PRIMERA LÍNEA de script.js, agrega:
+// script.js
 (function() {
-    console.log('🛡️ script.js: Verificación de emergencia INICIANDO');
-    
-    // DETECTAR si estamos en login.html
-    // Verificar por elementos ÚNICOS de login.html
     const tieneFormularioLogin = document.getElementById('loginForm') !== null;
     const tieneInputUsuario = document.getElementById('username') !== null;
-    const esLoginPage = window.location.pathname === '/' || 
-                       window.location.pathname === '' ||
-                       window.location.href === window.location.origin ||
-                       window.location.href === window.location.origin + '/';
-    
-    console.log('🔍 Detección login:');
-    console.log('  - Formulario login:', tieneFormularioLogin ? 'SÍ' : 'NO');
-    console.log('  - Input usuario:', tieneInputUsuario ? 'SÍ' : 'NO');
-    console.log('  - Es ruta raíz:', esLoginPage ? 'SÍ' : 'NO');
-    
-    // SI es login page → NO EJECUTAR script.js
+    const esLoginPage = window.location.href === window.location.origin + '/';
+  
     if (tieneFormularioLogin || tieneInputUsuario || esLoginPage) {
-        console.log('🚨 EMERGENCIA: script.js detectado en login page!');
-        console.log('⛔ DETENIENDO EJECUCIÓN COMPLETA de script.js');
         
         // 1. Deshabilitar completamente
         window.__SCRIPT_JS_BLOQUEADO = true;
         
         // 2. Sobrescribir TODO para que no haga nada
         window.SistemaCisterna = function() {
-            console.log('⛔ SistemaCisterna BLOQUEADO - login page');
             return { init: function() {} };
         };
         
@@ -35,28 +18,20 @@
         const originalAdd = document.addEventListener;
         document.addEventListener = function(type, listener) {
             if (type === 'DOMContentLoaded') {
-                console.log('⛔ DOMContentLoaded BLOQUEADO');
                 return;
             }
             return originalAdd.apply(this, arguments);
         };
         
-        // 4. SALIR completamente
-        // No crear clase, no hacer nada
-        throw new Error('script.js bloqueado - página de login');
+        throw new Error('No has iniciado sesión');
     }
-    
-    console.log('✅ script.js: Página protegida detectada, continuando...');
 })();
-
-// LUEGO el resto de tu script.js normal...
 
 // ========== CLASE SISTEMA CISTERNA ==========
 class SistemaCisterna {
     constructor() {
         // Verificar si script.js fue deshabilitado (para login)
         if (window.__scriptJsDisabled) {
-            console.log('⏸️ SistemaCisterna: Constructor bloqueado (login page)');
             return;
         }
         
@@ -78,26 +53,18 @@ class SistemaCisterna {
     }
 
     init() {
-        // Verificar si script.js fue deshabilitado
         if (window.__scriptJsDisabled) {
-            console.log('⏸️ SistemaCisterna.init(): Bloqueado (login page)');
             return;
         }
-        
-        console.log('🔐 SistemaCisterna: Verificando autenticación...');
-        
-        // 1. Verificar autenticación
+    
         if (!this.checkAuthentication()) {
-            console.log('❌ SistemaCisterna: Usuario no autenticado');
             return;
         }
         
         // 2. Cargar token y datos del usuario
         this.loadUserData();
-        
         // 3. Configurar fetch con interceptor de token
         this.setupAuthInterceptor();
-        
         // 4. Continuar con la inicialización normal
         this.continueInitialization();
     }
@@ -105,21 +72,18 @@ class SistemaCisterna {
     checkAuthentication() {
         // Verificar si está autenticado usando el middleware
         if (typeof AuthMiddleware === 'undefined') {
-            console.error('❌ AuthMiddleware no está definido');
             return false;
         }
         return AuthMiddleware.isAuthenticated();
     }
 
     loadUserData() {
-        // Cargar datos del usuario desde sessionStorage
+        
         this.userData = AuthMiddleware.getUser();
         this.authToken = AuthMiddleware.getToken();
         
-        console.log('✅ SistemaCisterna: Usuario cargado:', this.userData?.username);
-        
         // Mostrar nombre de usuario si hay elemento para ello
-        this.showUserName();
+        //this.showUserName();
     }
 
     showUserName() {
@@ -155,22 +119,19 @@ class SistemaCisterna {
                 
                 // Si la respuesta es 401 o 403, hacer logout
                 if (response.status === 401 || response.status === 403) {
-                    console.log('🔐 Token inválido o expirado, redirigiendo...');
+                    console.log('Necesitas iniciar sesión de nuevo');
                     AuthMiddleware.redirectToLogin();
                     return response;
                 }
                 
                 return response;
             } catch (error) {
-                console.error('❌ Error en petición:', error);
                 throw error;
             }
         };
     }
 
     continueInitialization() {
-        console.log('🚀 SistemaCisterna: Inicializando funcionalidades...');
-        
         // Cargar configuración en el dashboard
         this.cargarConfiguracionEnDashboard();
         
@@ -182,11 +143,9 @@ class SistemaCisterna {
         
         // Si estamos en el dashboard, actualizar datos específicos
         if (this.isDashboardPage()) {
-            console.log('📊 SistemaCisterna: Dashboard detectado, actualizando cada 10s');
             this.updateDashboard();
             setInterval(() => this.updateDashboard(), 10000);
         } else {
-            console.log('📊 SistemaCisterna: Otra página, actualizando info común cada 10s');
             setInterval(() => this.updateCommonInfo(), 10000);
         }
         
@@ -201,10 +160,10 @@ class SistemaCisterna {
         // Verificar sesión cada minuto
         setInterval(() => {
             if (!AuthMiddleware.isAuthenticated()) {
-                console.log('⏰ Sesión expirada, redirigiendo...');
+                console.log('Sesión expirada, redirigiendo...');
                 AuthMiddleware.redirectToLogin();
             }
-        }, 60000);
+        }, 20000);
     }
 
     cargarConfiguracionEnDashboard() {
@@ -300,7 +259,7 @@ class SistemaCisterna {
             this.updateLastRefresh();
             
         } catch (error) {
-            console.error("❌ Error obteniendo datos:", error);
+            console.error("Error obteniendo datos:", error);
             this.showError();
         }
     }
@@ -316,7 +275,7 @@ class SistemaCisterna {
             this.updateLastRefresh();
             
         } catch (error) {
-            console.error("❌ Error en dashboard:", error);
+            console.error("Error en dashboard:", error);
             this.showError();
         }
     }
@@ -378,7 +337,6 @@ class SistemaCisterna {
 // SOLO ejecutar si NO estamos en login page
 (function() {
     // Verificar nuevamente si estamos en login (por seguridad)
-    const currentPath = window.location.pathname;
     const currentUrl = window.location.href;
     const origin = window.location.origin;
     
@@ -386,26 +344,14 @@ class SistemaCisterna {
         currentUrl === origin + '/';
     
     if (isLoginPage) {
-        console.log('⏸️ script.js: Login page detectada - NO inicializando');
         return;
     }
     
     // Solo inicializar en páginas protegidas
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('📊 script.js: DOMContentLoaded en página protegida');
-        
-        // Verificar que AuthMiddleware exista
-        if (typeof AuthMiddleware === 'undefined') {
-            console.error('❌ ERROR: AuthMiddleware no definido');
-            return;
-        }
-        
         // Usar protectPage() para verificar autenticación
         if (AuthMiddleware.protectPage()) {
-            console.log('✅ script.js: Usuario autenticado, creando SistemaCisterna');
             new SistemaCisterna();
-        } else {
-            console.log('⏸️ script.js: protectPage() retornó false');
         }
     });
 })();

@@ -71,30 +71,23 @@ loginForm.addEventListener('submit', async function(e) {
             sessionStorage.setItem('userData', JSON.stringify(data.user));
             sessionStorage.setItem('lastLogin', new Date().toISOString());
             
-            console.log('💾 Datos guardados en sessionStorage:');
-            console.log('  - authToken:', sessionStorage.getItem('authToken') ? 'GUARDADO' : 'ERROR');
-            console.log('  - userData:', sessionStorage.getItem('userData') ? 'GUARDADO' : 'ERROR');
-            
             // Verificar que realmente se guardó
             const tokenGuardado = sessionStorage.getItem('authToken');
             if (!tokenGuardado || tokenGuardado !== data.token) {
-                console.error('❌ ERROR: Token NO se guardó correctamente en sessionStorage');
                 showAlert('Error guardando sesión', 'error');
                 return;
             }
             
-            console.log('🔄 Redirigiendo a /dashboard en 1 segundo...');
             
             // Redirigir después de 1 segundo
             setTimeout(() => {
-                console.log('🚀 Redirección ejecutándose...');
                 window.location.href = '/dashboard';
-            }, 10000);
+            }, 1000);
             
         } else {
             // Login fallido
             const errorMsg = data.error || 'Credenciales incorrectas';
-            console.log('❌ Login fallido:', errorMsg);
+            console.log('Login fallido:', errorMsg);
             
             showAlert(`✗ ${errorMsg}`, 'error');
             passwordInput.focus();
@@ -105,14 +98,13 @@ loginForm.addEventListener('submit', async function(e) {
         
     } catch (error) {
         // Error de red o timeout
-        console.error('❌ Error de conexión:', error);
         
         if (error.name === 'TimeoutError' || error.name === 'AbortError') {
-            showAlert('⏱️ Tiempo de espera agotado', 'error');
+            showAlert('Tiempo de espera agotado', 'error');
         } else if (error.name === 'TypeError') {
-            showAlert('🌐 Error de conexión', 'error');
+            showAlert('Error de conexión', 'error');
         } else {
-            showAlert('⚠️ Error inesperado', 'error');
+            showAlert('Error inesperado', 'error');
         }
         
     } finally {
@@ -171,61 +163,4 @@ document.querySelectorAll('input').forEach(input => {
     });
 });
 
-// ========== VERIFICACIÓN DE SESSIONSTORAGE ==========
-// Función para verificar sessionStorage
-function verificarSessionStorage() {
-    console.log('🔍 Verificando sessionStorage:');
-    console.log('  - Soporte sessionStorage:', typeof sessionStorage !== 'undefined' ? 'SÍ' : 'NO');
-    console.log('  - authToken:', sessionStorage.getItem('authToken') ? 'EXISTE' : 'NO EXISTE');
-    console.log('  - userData:', sessionStorage.getItem('userData') ? 'EXISTE' : 'NO EXISTE');
-    
-    // Probar escritura/lectura
-    try {
-        const testKey = '__test_login_' + Date.now();
-        sessionStorage.setItem(testKey, 'test_value');
-        const readValue = sessionStorage.getItem(testKey);
-        sessionStorage.removeItem(testKey);
-        
-        console.log('  - Lectura/escritura funcional:', readValue === 'test_value' ? 'SÍ' : 'NO');
-    } catch (error) {
-        console.error('  - ERROR sessionStorage:', error);
-    }
-}
-// Al INICIO de login.js, después de las constantes:
-console.log('📄 login.js: Inicializando...');
 
-// VERIFICAR ELEMENTOS DEL DOM
-function verificarDOM() {
-    console.log('🔍 Verificando elementos DOM:');
-    
-    const elementos = {
-        'loginForm': document.getElementById('loginForm'),
-        'username': document.getElementById('username'),
-        'password': document.getElementById('password'),
-        'loginBtn': document.getElementById('loginBtn'),
-        'alertMessage': document.getElementById('alertMessage'),
-        'loginContainer': document.querySelector('.login-container'),
-        'loginCard': document.querySelector('.login-card')
-    };
-    
-    Object.keys(elementos).forEach(key => {
-        console.log(`  ${key}:`, elementos[key] ? '✅ ENCONTRADO' : '❌ NO ENCONTRADO');
-    });
-    
-    // Si falta el formulario, mostrar error
-    if (!elementos.loginForm) {
-        console.error('❌ ERROR CRÍTICO: Formulario de login NO encontrado');
-        document.body.innerHTML = `
-            <div style="padding: 50px; text-align: center; font-family: Arial;">
-                <h1 style="color: red;">ERROR: Formulario no encontrado</h1>
-                <p>El formulario de login no se pudo cargar.</p>
-                <p>URL: ${window.location.href}</p>
-                <p>Path: ${window.location.pathname}</p>
-                <button onclick="location.reload()">Recargar página</button>
-            </div>
-        `;
-    }
-}
-
-// Ejecutar verificación inmediatamente
-verificarDOM();

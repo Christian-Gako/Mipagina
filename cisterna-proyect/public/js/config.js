@@ -1,3 +1,4 @@
+// public/config.js
 
 // Validar sesión al cargar la página
 document.addEventListener('DOMContentLoaded', async function() {
@@ -7,11 +8,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     
     // 2. Si está autenticado, cargar datos del usuario
-    const user = AuthMiddleware.getUser();
+    //const user = AuthMiddleware.getUser();
     new ConfiguracionManager();
 
 });
-// public/config.js - VERSIÓN CORREGIDA (GUARDA ANTES DE REINICIAR)
+
 class ConfiguracionManager {
     constructor() {
         this.form = document.getElementById('configForm');
@@ -24,7 +25,6 @@ class ConfiguracionManager {
     }
 
     init() {
-        console.log("⚙️ Iniciando gestor de configuración...");
         this.cargarConfiguracion();
         
         this.form.addEventListener('submit', (e) => this.guardarConfiguracion(e));
@@ -32,22 +32,6 @@ class ConfiguracionManager {
         this.testBtn.addEventListener('click', () => this.probarConexion());
     }
 
-    async cargarConfiguracion() {
-        try {
-            console.log('📡 Cargando configuración desde servidor...');
-            const response = await fetch('/api/configuracion');
-            
-            if (!response.ok) throw new Error('Error del servidor');
-            
-            const config = await response.json();
-            this.llenarFormulario(config);
-            console.log('✅ Configuración cargada desde MongoDB');
-            
-        } catch (error) {
-            console.log('⚠️ Error cargando configuración:', error);
-            this.cargarConfiguracionLocal();
-        }
-    }
 
     llenarFormulario(config) {
         const campos = [
@@ -69,13 +53,7 @@ class ConfiguracionManager {
         });
     }
 
-    cargarConfiguracionLocal() {
-        const config = JSON.parse(localStorage.getItem('configuracionCisterna')) || {};
-        this.llenarFormulario(config);
-        console.log('📋 Configuración cargada desde localStorage');
-    }
-
-    async guardarConfiguracion(event) {
+      async guardarConfiguracion(event) {
         event.preventDefault();
         
         const formData = new FormData(this.form);
@@ -95,15 +73,12 @@ class ConfiguracionManager {
         const configAnterior = JSON.parse(localStorage.getItem('configuracionCisterna') || '{}');
         if (configuracion.frecuenciaMuestreo !== configAnterior.frecuenciaMuestreo) {
             necesitaReinicio = true;
-            console.log('🔄 Cambio detectado en frecuencia de muestreo:', configuracion.frecuenciaMuestreo + 'ms');
         }
         
         try {
-            console.log('💾 Iniciando guardado de configuración...');
-            this.mostrarMensaje('💾 Guardando configuración en MongoDB...', 'info');
+            this.mostrarMensaje('Guardando configuración...', 'info');
             
             // PASO 1: GUARDAR EN MONGODB (ESPERAR CONFIRMACIÓN)
-            console.log('📤 Enviando configuración a /api/configuracion...');
             const response = await fetch('/api/configuracion', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -116,16 +91,13 @@ class ConfiguracionManager {
                 throw new Error(resultado.error || 'Error desconocido al guardar');
             }
             
-            console.log('✅ Configuración guardada en MongoDB:', resultado);
-            
             // PASO 2: GUARDAR LOCALMENTE
             localStorage.setItem('configuracionCisterna', JSON.stringify(configuracion));
             this.notificarCambioConfiguracion();
             
             // PASO 3: VERIFICAR Y REINICIAR SI ES NECESARIO
             if (necesitaReinicio) {
-                console.log('🔁 Configuración guardada, procediendo con reinicio...');
-                this.mostrarMensaje('✅ Configuración guardada. Reiniciando servidor...', 'info');
+                this.mostrarMensaje('Configuración guardada. Reiniciando servidor...', 'info');
                 
                 // Esperar 3 segundos para asegurar que todo se procesó
                 await new Promise(resolve => setTimeout(resolve, 3000));
@@ -133,29 +105,25 @@ class ConfiguracionManager {
                 // PASO 4: REINICIAR SERVIDOR
                 await this.reiniciarServidor();
             } else {
-                this.mostrarMensaje('✅ Configuración guardada correctamente', 'info');
-                console.log('✅ Configuración guardada (sin cambios que requieran reinicio)');
+                this.mostrarMensaje('configuración guardada correctamente', 'info');
             }
             
         } catch (error) {
-            console.error('❌ Error en el proceso de guardado:', error);
+            console.error(' Error en el proceso de guardado:', error);
             
             // FALLBACK: Guardar solo localmente
             localStorage.setItem('configuracionCisterna', JSON.stringify(configuracion));
             this.notificarCambioConfiguracion();
             
             if (necesitaReinicio) {
-                this.mostrarMensaje('⚠️ Configuración guardada localmente. Reinicia el servidor manualmente.', 'warning');
-            } else {
-                this.mostrarMensaje('✅ Configuración guardada localmente', 'info');
+                this.mostrarMensaje('Configuración guardada localmente. Reinicia el servidor manualmente.', 'warning');
             }
         }
     }
 
     async reiniciarServidor() {
         try {
-            console.log('🔄 Iniciando reinicio de servidor...');
-            this.mostrarMensaje('🔄 Reiniciando servidor, por favor espera...', 'warning');
+            this.mostrarMensaje('Reiniciando servidor, por favor espera...', 'warning');
             
             const response = await fetch('/api/servidor/reiniciar', {
                 method: 'POST',
@@ -165,12 +133,10 @@ class ConfiguracionManager {
             const resultado = await response.json();
             
             if (resultado.success) {
-                console.log('✅ Servidor reiniciado:', resultado.message);
                 this.mostrarMensaje('✅ ' + resultado.message, 'info');
                 
                 // Recargar la página después de un delay
                 setTimeout(() => {
-                    console.log('🔄 Recargando página...');
                     window.location.reload();
                 }, 3000);
                 
@@ -179,8 +145,7 @@ class ConfiguracionManager {
             }
             
         } catch (error) {
-            console.error('❌ Error en reinicio de servidor:', error);
-            this.mostrarMensaje('❌ Error al reiniciar: ' + error.message + '. Reinicia manualmente.', 'danger');
+            this.mostrarMensaje('Error al reiniciar. Reinicia manualmente.', 'danger');
         }
     }
 
@@ -195,16 +160,48 @@ class ConfiguracionManager {
             localStorage.removeItem('configuracionCisterna');
             this.form.reset();
             this.mostrarMensaje('🔄 Valores restablecidos a predeterminados', 'info');
-            console.log('🔄 Configuración restablecida a valores predeterminados');
         }
     }
 
-    probarConexion() {
-        this.mostrarMensaje('🔍 Probando conexión con el sistema...', 'info');
-        setTimeout(() => {
-            this.mostrarMensaje('✅ Conexión con el sistema establecida correctamente', 'info');
-        }, 2000);
+    
+async probarConexion() {
+    this.mostrarMensaje('🔌 Probando conexión con el servidor...', 'info');
+    
+    try {
+        
+        const response = await fetch('/test', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            timeout: 5000 // 5 segundos timeout
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Mostrar resultado según respuesta
+        if (data.mongodb === 'Conectado') {
+            this.mostrarMensaje(`${data.message} | MongoDB: ${data.mongodb}`, 'success');
+        } else {
+            this.mostrarMensaje(`${data.message} | MongoDB: ${data.mongodb}`, 'warning');
+        }
+        
+    } catch (error) {
+        
+        // Mensajes específicos según error
+        if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+            this.mostrarMensaje('Tiempo de espera agotado. El servidor no responde.', 'error');
+        } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            this.mostrarMensaje('Error de red. Verifica tu conexión a internet.', 'error');
+        } else {
+            this.mostrarMensaje(`Error de conexión: ${error.message}`, 'error');
+        }
     }
+}
 
     mostrarMensaje(mensaje, tipo = 'info') {
         this.statusMessage.textContent = mensaje;

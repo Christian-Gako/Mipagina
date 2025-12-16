@@ -87,7 +87,6 @@ class AuthMiddleware {
                 
                 // Si recibe 401 o 403, hacer logout
                 if (response.status === 401 || response.status === 403) {
-                    console.log('🔐 Token inválido en petición API, redirigiendo...');
                     AuthMiddleware.redirectToLogin();
                 }
                 
@@ -100,7 +99,6 @@ class AuthMiddleware {
 
     // ========== FUNCIÓN PROTECTPAGE() CORREGIDA ==========
     static protectPage() {
-        console.log('🔒 [auth-middleware] protectPage() INICIANDO');
        
         const origin = window.location.origin;
         const currentUrl = window.location.href;
@@ -117,24 +115,18 @@ class AuthMiddleware {
             
             // Si YA está autenticado → REDIRIGIR a DASHBOARD
             if (token && userData) {
-                console.log('🔄 Usuario YA autenticado, redirigiendo a DASHBOARD');
-                //window.location.href = '/dashboard';
                 return false; // No permitir acceso al login
             }
-            
-            console.log('✅ Mostrar formulario de login (usuario no autenticado)');
             return true; // Permitir acceso al login
         }
         
         // Si NO está autenticado → REDIRIGIR a LOGIN
         if (!token || !userData) {
-            console.log('🚫 Usuario NO autenticado, redirigiendo a LOGIN');
             this.redirectToLogin();
             return false;
         }
         
         // 4. USUARIO AUTENTICADO EN PÁGINA PROTEGIDA → PERMITIR
-        console.log('✅ Acceso PERMITIDO: Usuario autenticado');
         return true;
     }
 
@@ -142,9 +134,7 @@ class AuthMiddleware {
     static redirectToLogin() {
         // Limpiar sesión primero
         this.clearSession();
-        const rootUrl = window.location.origin + '/';
-        console.log('🔀 Redirigiendo a LOGIN:', rootUrl);
-        
+        const rootUrl = window.location.origin + '/login';
         // Usar location.replace para evitar que quede en el historial
         window.location.replace(rootUrl);
     }
@@ -156,17 +146,13 @@ class AuthMiddleware {
     if (typeof window !== 'undefined') {
         // Verificar si ya está cargado
         if (!window.AuthMiddlewareInitialized) {
-            console.log('✅ Configurando interceptor fetch...');
             AuthMiddleware.setupFetchInterceptor();
             window.AuthMiddlewareInitialized = true;
             
             // También ejecutar protectPage() automáticamente para seguridad
             setTimeout(() => {
-                console.log('🛡️ auth-middleware.js: Ejecutando verificación automática...');
                 AuthMiddleware.protectPage();
             }, 50);
-        } else {
-            console.log('⏭️ auth-middleware.js: Ya estaba inicializado');
         }
     }
 })();

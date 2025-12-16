@@ -23,10 +23,7 @@ const port = process.env.PORT;
 app.get('/diagnostico', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'diagnostico.html'));
 });
-app.get('/', (req, res) => {
-    res.redirect(302, '/login');
-});
-app.get('/login', (req, res) => {
+app.get('/','/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
@@ -138,12 +135,6 @@ WaterLevelSchema.pre('save', async function(next) {
         } else {
             this.ubicacion = obtenerUbicacionPorSensorID(this.sensor);
         }
-        
-    
-        console.log(`Calculado automáticamente:`);
-        console.log(`${this.value}% → ${this.volumen}L (de ${capacidad}L)`);
-        console.log(`Estado: ${this.estado} (A:${umbralAlerta}%, C:${umbralCritico}%)`);
-        console.log(`${this.ubicacion}`);
         
         next();
         
@@ -575,7 +566,7 @@ app.get('/api/records/export', async (req, res) => {
 
 app.get('/test', (req, res) => {
     res.json({ 
-        message: '¡Servidor funcionando! ',
+        message: 'Servidor funcionando',
         mongodb: mongoose.connection.readyState === 1 ? 'Conectado' : 'No Conectado'});
 });
 
@@ -624,12 +615,12 @@ app.post('/api/esp32/data', async (req, res) => {
 // ============================================
 
 async function iniciarServidor() {
-    await cargarConfiguracionInicial();
     
     app.listen(port, () => {
         console.log(`📊 Frecuencia de muestreo: ${intervaloMuestreo}ms`);
 
     });
+    await cargarConfiguracionInicial();
 }
 
 
