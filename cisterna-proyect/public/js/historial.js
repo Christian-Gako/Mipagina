@@ -614,6 +614,10 @@ async function confirmarExportacion() {
         mostrarMensaje('Selecciona al menos una columna', 'warning');
         return;
     }
+    if(totalItems===0 && !exportAll){
+        mostrarMensaje('Sin datos filtrados para exportar', 'warning');
+        return;
+    }
     
     try {
         const params = new URLSearchParams({

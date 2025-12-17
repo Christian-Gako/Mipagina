@@ -166,48 +166,76 @@ class SistemaCisterna {
         }, 20000);
     }
 
-    cargarConfiguracionEnDashboard() {
+    async cargarConfiguracionEnDashboard() {
         if (!this.isDashboardPage()) return;
+        try {
         
-        // Cargar configuración desde localStorage
-        const config = JSON.parse(localStorage.getItem('configuracionCisterna')) || {};
-        
-        // Mapeo de campos de configuración a elementos HTML
-        const mapeoCampos = {
-            'cisternaNombre': 'config-cisternaNombre',
-            'cisternaCapacidad': 'config-cisternaCapacidad',
-            'cisternaUbicacion': 'config-cisternaUbicacion', 
-            'cisternaMaterial': 'config-cisternaMaterial',
-            'sensorModelo': 'config-sensorModelo',
-            'sensorID': 'config-sensorID',
-            'sensorInstalacion': 'config-sensorInstalacion',
-            'sensorPrecision': 'config-sensorPrecision',
-            'frecuenciaMuestreo': 'config-frecuenciaMuestreo'
-        };
-        
-        // Actualizar cada campo en el dashboard
-        Object.keys(mapeoCampos).forEach(campoConfig => {
-            const elementoId = mapeoCampos[campoConfig];
-            const elemento = document.getElementById(elementoId);
-            
-            if (elemento) {
-                let valor = config[campoConfig] || this.getValorPorDefecto(campoConfig);
-                
-                // Formatear valores especiales
-                if (campoConfig === 'cisternaCapacidad') {
-                    valor = `${Number(valor).toLocaleString()} litros`;
-                } else if (campoConfig === 'frecuenciaMuestreo') {
-                    valor = this.formatearFrecuencia(valor);
-                }
-                
-                elemento.textContent = valor;
-            }
+        const response = await fetch('/api/configuracion/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            timeout: 5000 // 5 segundos timeout
         });
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }else{ 
+            
+            const data = await response.json();
+
+            // Cargar configuración desde localStorage
+            //const config = JSON.parse(localStorage.getItem('configuracionCisterna')) || {};
+            
+            // Mapeo de campos de configuración a elementos HTML
+            const mapeoCampos = {
+                'cisternaNombre': 'config-cisternaNombre',
+                'cisternaCapacidad': 'config-cisternaCapacidad',
+                'cisternaUbicacion': 'config-cisternaUbicacion', 
+                'cisternaMaterial': 'config-cisternaMaterial',
+                'sensorModelo': 'config-sensorModelo',
+                'sensorID': 'config-sensorID',
+                'sensorInstalacion': 'config-sensorInstalacion',
+                'sensorPrecision': 'config-sensorPrecision',
+                'frecuenciaMuestreo': 'config-frecuenciaMuestreo'
+            };
+            
+            // Actualizar cada campo en el dashboard
+            Object.keys(mapeoCampos).forEach(campoConfig => {
+                const elementoId = mapeoCampos[campoConfig];
+                const elemento = document.getElementById(elementoId);
+                
+                if (elemento) {
+                    let valor = data[campoConfig] || this.getValorPorDefecto(campoConfig);
+                    
+                    // Formatear valores especiales
+                    if (campoConfig === 'cisternaCapacidad') {
+                        valor = `${Number(valor).toLocaleString()} litros`;
+                    } else if (campoConfig === 'frecuenciaMuestreo') {
+                        valor = this.formatearFrecuencia(valor);
+                    }
+                    
+                    elemento.textContent = valor;
+                }
+            });
+        }
+    }catch (error) {
+        
+        // Mensajes específicos según error
+        if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+            this.mostrarMensaje('Tiempo de espera agotado. El servidor no responde.', 'error');
+        } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            this.mostrarMensaje('Error de red. Verifica tu conexión a internet.', 'error');
+        } else {
+            this.mostrarMensaje(`Error de conexión: ${error.message}`, 'error');
+        }
     }
+}
+    
 
     getValorPorDefecto(campo) {
         const valoresPorDefecto = {
-            'cisternaNombre': 'No obtenido',
+            'cisternaNombre': 'No o',
             'cisternaCapacidad': '0',
             'cisternaUbicacion': 'No obtenido',
             'cisternaMaterial': 'No obtenido',
