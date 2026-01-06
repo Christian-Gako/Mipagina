@@ -6,11 +6,11 @@ const bcrypt = require('bcryptjs');
 const MONGODB_URI = 'mongodb+srv://ChristianCG:Gako0719caLAbi@cluster0.mwretdh.mongodb.net/cisterna_db?retryWrites=true&w=majority'; // ← CAMBIA
 
 const USER_DATA = {
-    name: "Administrador TESCH",      // ← CAMBIA
-    email: "admin@tesch.edu.mx",      // ← CAMBIA  
+    name: "Administrador1",      // ← CAMBIA
+    email: "admin1@tesch.edu.mx",      // ← CAMBIA  
     username: "admin",                // ← CAMBIA
-    password: "Admin123!",            // ← CAMBIA (mínimo 6 caracteres)
-    role: "admin",                    // admin, profesor, estudiante
+    password: "m14m1g0123$",            // ← CAMBIA (mínimo 6 caracteres)
+    role: "admin",                   
     isActive: true
 };
 // =====================================

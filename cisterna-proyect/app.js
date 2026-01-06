@@ -203,6 +203,79 @@ async function cargarConfiguracionInicial() {
 // APIs EXISTENTES
 // ============================================
 
+
+app.get('/api/reportes', authenticateToken, async (req, res) => {
+    try {
+        const { tipo, fecha, turno, semana, mes, inicio, fin, intervalo } = req.query;
+        
+        let query = {};
+        let fechaInicio, fechaFin;
+        
+        switch(tipo) {
+            case 'daily':
+                fechaInicio = new Date(fecha);
+                fechaFin = new Date(fecha);
+                fechaFin.setDate(fechaFin.getDate() + 1);
+                
+                if (turno !== 'complete') {
+                    // Ajustar por turno
+                    if (turno === 'morning') {
+                        fechaInicio.setHours(6, 0, 0, 0);
+                        fechaFin.setHours(14, 0, 0, 0);
+                    } else if (turno === 'afternoon') {
+                        fechaInicio.setHours(14, 0, 0, 0);
+                        fechaFin.setHours(22, 0, 0, 0);
+                    } else if (turno === 'night') {
+                        fechaInicio.setHours(22, 0, 0, 0);
+                        fechaFin.setDate(fechaFin.getDate() + 1);
+                        fechaFin.setHours(6, 0, 0, 0);
+                    }
+                }
+                break;
+                
+            case 'weekly':
+                // Parsear semana (formato YYYY-Www)
+                const [year, week] = semana.split('-W');
+                fechaInicio = new Date(year, 0, 1 + (week - 1) * 7);
+                fechaFin = new Date(fechaInicio);
+                fechaFin.setDate(fechaFin.getDate() + 7);
+                break;
+                
+            case 'monthly':
+                fechaInicio = new Date(mes + '-01');
+                fechaFin = new Date(fechaInicio);
+                fechaFin.setMonth(fechaFin.getMonth() + 1);
+                break;
+                
+            case 'custom':
+                fechaInicio = new Date(inicio);
+                fechaFin = new Date(fin);
+                break;
+                
+            default:
+                return res.status(400).json({ error: 'Tipo de reporte no válido' });
+        }
+        
+        query.timestamp = {
+            $gte: fechaInicio,
+            $lt: fechaFin
+        };
+        
+        // Obtener datos de MongoDB
+        const datos = await LevelData.find(query)
+            .sort({ timestamp: 1 })
+            .select('timestamp level temperature')
+            .lean();
+        
+        // Si no hay datos, devolver array vacío
+        res.json(datos || []);
+        
+    } catch (error) {
+        console.error('Error en endpoint de reportes:', error);
+        res.status(500).json({ error: 'Error al generar reporte' });
+    }
+});
+
 app.get('/api/level', async (req, res) => {
     try {
         if (mongoose.connection.readyState !== 1) {

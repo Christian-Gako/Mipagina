@@ -3,16 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoreo de Cisterna</title>
+    <title>Reportes - Monitoreo de Cisterna</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
     <div class="dashboard">
         <header class="header">
             <div class="header-content">
-                <h1>Sistema de Monitoreo</h1>
-                <p class="subtitle">TESCHA</p>
+                <h1><i class="fas fa-chart-line"></i> Reportes y Análisis</h1>
+                <p class="subtitle">Sistema de Monitoreo de Cisterna - TESCHA</p>
+            </div>
+            <div class="header-actions">
+                <div class="user-info" id="userDisplay">
+                    <i class="fas fa-user"></i>
+                    <span id="userName">Usuario</span>
+                </div>
+                <button class="btn btn-logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
             </div>
         </header>
 
@@ -40,90 +50,147 @@
                             Cargando estado del sistema...
                         </div>
                     </div>
+                    <div class="last-update">
+                        <i class="fas fa-sync-alt"></i>
+                        Última actualización: <span id="lastRefresh">--:--:--</span>
+                    </div>
                 </div>
             </aside>
 
             <div class="content-area">
+                <!-- Mensajes del sistema -->
+                <div class="message-container" id="messageContainer" style="display: none;">
+                    <div class="alert-item" id="statusMessage"></div>
+                </div>
+
+                <!-- Panel de selección de reportes -->
                 <div class="reports-panel">
-                    <h2>Reportes y Análisis</h2>
+                    <h2><i class="fas fa-file-alt"></i> Generador de Reportes</h2>
                     
                     <!-- Selector de Tipo de Reporte -->
                     <div class="report-type-selector">
                         <h3>Selecciona el tipo de Reporte</h3>
                         <div class="report-cards">
                             <div class="report-card" data-report="daily">
-                                <div class="report-icon">📅</div>
+                                <div class="report-icon"><i class="fas fa-calendar-day"></i></div>
                                 <h4>Reporte Diario</h4>
-                                <p>Análisis detallado del consumo diario</p>
+                                <p>Análisis detallado del día seleccionado</p>
                             </div>
                             
                             <div class="report-card" data-report="weekly">
-                                <div class="report-icon">📊</div>
+                                <div class="report-icon"><i class="fas fa-calendar-week"></i></div>
                                 <h4>Reporte Semanal</h4>
-                                <p>Tendencias y promedios semanales</p>
+                                <p>Tendencias y promedios de la semana</p>
                             </div>
                             
                             <div class="report-card" data-report="monthly">
-                                <div class="report-icon">📈</div>
+                                <div class="report-icon"><i class="fas fa-calendar-alt"></i></div>
                                 <h4>Reporte Mensual</h4>
-                                <p>Estadísticas y comparativas mensuales</p>
+                                <p>Estadísticas y comparativas del mes</p>
                             </div>
                             
                             <div class="report-card" data-report="custom">
-                                <div class="report-icon">⚙️</div>
+                                <div class="report-icon"><i class="fas fa-sliders-h"></i></div>
                                 <h4>Reporte Personalizado</h4>
-                                <p>Configura tus propios parámetros</p>
+                                <p>Configura parámetros específicos</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Panel de Configuración de Reportes -->
-                    <div class="report-configuration" id="reportConfig" style="display: none;">
-                        <h3>Configuración del Reporte</h3>
-                        <div class="config-filters">
-                            <div class="filter-group">
-                                <label for="reportDate">Fecha:</label>
-                                <input type="date" id="reportDate">
-                            </div>
-                            <div class="filter-group">
-                                <label for="reportPeriod">Período:</label>
-                                <select id="reportPeriod">
-                                    <option value="day">Día completo</option>
-                                    <option value="morning">Turno mañana (6:00-14:00)</option>
-                                    <option value="afternoon">Turno tarde (14:00-22:00)</option>
-                                    <option value="night">Turno noche (22:00-6:00)</option>
-                                </select>
-                            </div>
-                            <button class="btn btn-primary" id="generateReport">Generar Reporte</button>
+                    <div class="report-configuration card" id="reportConfig" style="display: none;">
+                        <h3><i class="fas fa-cog"></i> Configuración del Reporte</h3>
+                        <div class="config-filters" id="filtersContainer">
+                            <!-- Filtros dinámicos según tipo de reporte -->
+                        </div>
+                        <div class="config-actions">
+                            <button class="btn btn-primary" id="generateReport">
+                                <i class="fas fa-play"></i> Generar Reporte
+                            </button>
+                            <button class="btn btn-secondary" id="cancelConfig">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
                         </div>
                     </div>
 
                     <!-- Resultados del Reporte -->
-                    <div class="report-results" id="reportResults" style="display: none;">
-                        <h3>Resultados del Reporte</h3>
+                    <div class="report-results card" id="reportResults" style="display: none;">
+                        <div class="report-header">
+                            <h3><i class="fas fa-chart-bar"></i> Resultados del Reporte</h3>
+                            <div class="report-meta">
+                                <span id="reportTitle">Reporte Diario</span>
+                                <span id="reportDateRange">15 Dic 2024</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Estadísticas principales -->
                         <div class="report-stats">
-                            <div class="stat-card">
+                            <div class="stat-card primary">
+                                <div class="stat-icon"><i class="fas fa-tint"></i></div>
                                 <div class="stat-value" id="avgLevel">--%</div>
                                 <div class="stat-label">Nivel Promedio</div>
                             </div>
-                            <div class="stat-card">
+                            <div class="stat-card warning">
+                                <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
                                 <div class="stat-value" id="minLevel">--%</div>
                                 <div class="stat-label">Nivel Mínimo</div>
                             </div>
-                            <div class="stat-card">
+                            <div class="stat-card success">
+                                <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
                                 <div class="stat-value" id="maxLevel">--%</div>
                                 <div class="stat-label">Nivel Máximo</div>
                             </div>
-                            <div class="stat-card">
+                            <div class="stat-card info">
+                                <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
                                 <div class="stat-value" id="consumption">-- L</div>
                                 <div class="stat-label">Consumo Estimado</div>
                             </div>
                         </div>
                         
+                        <!-- Gráfico (placeholder) -->
+                        <div class="report-chart-container">
+                            <div class="chart-placeholder" id="chartPlaceholder">
+                                <i class="fas fa-chart-area"></i>
+                                <p>El gráfico se generará aquí</p>
+                            </div>
+                            <canvas id="reportChart" style="display: none;"></canvas>
+                        </div>
+                        
+                        <!-- Tabla de datos -->
+                        <div class="report-table-container">
+                            <h4><i class="fas fa-table"></i> Datos Detallados</h4>
+                            <div class="table-responsive">
+                                <table class="data-table" id="reportTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Hora</th>
+                                            <th>Nivel (%)</th>
+                                            <th>Volumen (L)</th>
+                                            <th>Estado</th>
+                                            <th>Temperatura</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reportTableBody">
+                                        <!-- Datos dinámicos -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Acciones del reporte -->
                         <div class="report-actions">
-                            <button class="btn btn-info" id="printReport">🖨️ Imprimir Reporte</button>
-                            <button class="btn btn-secondary" id="exportReport">📥 Exportar PDF</button>
-                            <button class="btn btn-primary" id="newReport">📋 Nuevo Reporte</button>
+                            <button class="btn btn-info" id="printReport">
+                                <i class="fas fa-print"></i> Imprimir Reporte
+                            </button>
+                            <button class="btn btn-success" id="exportPDF">
+                                <i class="fas fa-file-pdf"></i> Exportar PDF
+                            </button>
+                            <button class="btn btn-secondary" id="exportCSV">
+                                <i class="fas fa-file-csv"></i> Exportar CSV
+                            </button>
+                            <button class="btn btn-primary" id="newReport">
+                                <i class="fas fa-plus"></i> Nuevo Reporte
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -131,10 +198,19 @@
         </main>
 
         <footer class="footer">
-            <p class="university">Tecnológico de Estudios Superiores de Chalco</p>
-            <p>Sistema de Monitoreo de Cisterna v0.4</p>
+            <p class="university">
+                <i class="fas fa-graduation-cap"></i> Tecnológico de Estudios Superiores de Chalco
+            </p>
+            <p>Sistema de Monitoreo de Cisterna v1.0 | Última actualización: <span id="footerDate"></span></p>
         </footer>
     </div>
+    
+    <!-- Librerías necesarias -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    
+    <!-- Scripts de la aplicación -->
     <script src="/js/auth-middleware.js"></script>
     <script src="/js/script.js"></script>
     <script src="/js/reportes.js"></script>
