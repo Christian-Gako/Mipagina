@@ -204,7 +204,7 @@ async function cargarConfiguracionInicial() {
 // ============================================
 
 
-app.get('/api/reportes', authenticateToken, async (req, res) => {
+app.get('/api/reportes', async (req, res) => {
     try {
         const { tipo, fecha, turno, semana, mes, inicio, fin, intervalo } = req.query;
         
