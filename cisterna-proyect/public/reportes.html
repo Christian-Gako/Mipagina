@@ -12,17 +12,8 @@
     <div class="dashboard">
         <header class="header">
             <div class="header-content">
-                <h1><i class="fas fa-chart-line"></i> Reportes y Análisis</h1>
-                <p class="subtitle">Sistema de Monitoreo de Cisterna - TESCHA</p>
-            </div>
-            <div class="header-actions">
-                <div class="user-info" id="userDisplay">
-                    <i class="fas fa-user"></i>
-                    <span id="userName">Usuario</span>
-                </div>
-                <button class="btn btn-logout" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i> Salir
-                </button>
+                <h1>Sistema de Monitoreo</h1>
+                <p class="subtitle">TESCHA</p>
             </div>
         </header>
 
@@ -46,13 +37,7 @@
                 <div class="alert-panel">
                     <h3><i class="fas fa-bell"></i> Alertas del Sistema</h3>
                     <div class="alerts-list" id="alertsList">
-                        <div class="alert-item info">
-                            Cargando estado del sistema...
-                        </div>
-                    </div>
-                    <div class="last-update">
-                        <i class="fas fa-sync-alt"></i>
-                        Última actualización: <span id="lastRefresh">--:--:--</span>
+                        <div class="alert-item info">Cargando estado del sistema...</div>
                     </div>
                 </div>
             </aside>
@@ -74,31 +59,27 @@
                             <div class="report-card" data-report="daily">
                                 <div class="report-icon"><i class="fas fa-calendar-day"></i></div>
                                 <h4>Reporte Diario</h4>
-                                <p>Análisis detallado del día seleccionado</p>
                             </div>
                             
                             <div class="report-card" data-report="weekly">
                                 <div class="report-icon"><i class="fas fa-calendar-week"></i></div>
                                 <h4>Reporte Semanal</h4>
-                                <p>Tendencias y promedios de la semana</p>
                             </div>
                             
                             <div class="report-card" data-report="monthly">
                                 <div class="report-icon"><i class="fas fa-calendar-alt"></i></div>
                                 <h4>Reporte Mensual</h4>
-                                <p>Estadísticas y comparativas del mes</p>
                             </div>
                             
                             <div class="report-card" data-report="custom">
                                 <div class="report-icon"><i class="fas fa-sliders-h"></i></div>
                                 <h4>Reporte Personalizado</h4>
-                                <p>Configura parámetros específicos</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Panel de Configuración de Reportes -->
-                    <div class="report-configuration card" id="reportConfig" style="display: none;">
+                    <div class="report-configuration card" id="reportConfig" style="display:none;">
                         <h3><i class="fas fa-cog"></i> Configuración del Reporte</h3>
                         <div class="config-filters" id="filtersContainer">
                             <!-- Filtros dinámicos según tipo de reporte -->
@@ -185,9 +166,6 @@
                             <button class="btn btn-success" id="exportPDF">
                                 <i class="fas fa-file-pdf"></i> Exportar PDF
                             </button>
-                            <button class="btn btn-secondary" id="exportCSV">
-                                <i class="fas fa-file-csv"></i> Exportar CSV
-                            </button>
                             <button class="btn btn-primary" id="newReport">
                                 <i class="fas fa-plus"></i> Nuevo Reporte
                             </button>
@@ -196,13 +174,11 @@
                 </div>
             </div>
         </main>
-
         <footer class="footer">
-            <p class="university">
-                <i class="fas fa-graduation-cap"></i> Tecnológico de Estudios Superiores de Chalco
-            </p>
-            <p>Sistema de Monitoreo de Cisterna v1.0 | Última actualización: <span id="footerDate"></span></p>
-        </footer>
+                <p class="university"><i class="fas fa-graduation-cap"></i> Tecnológico de Estudios Superiores de Chalco</p>
+                <p>Sistema de Monitoreo v0.4</p>
+            </footer>
+        
     </div>
     
     <!-- Librerías necesarias -->

@@ -46,9 +46,8 @@ class ReportesManager {
         this.cancelConfigBtn = document.getElementById('cancelConfig');
         this.printReportBtn = document.getElementById('printReport');
         this.exportPDFBtn = document.getElementById('exportPDF');
-        this.exportCSVBtn = document.getElementById('exportCSV');
         this.newReportBtn = document.getElementById('newReport');
-        this.logoutBtn = document.getElementById('logoutBtn');
+    
         
         // Elementos de resultados
         this.avgLevelElement = document.getElementById('avgLevel');
@@ -88,13 +87,12 @@ class ReportesManager {
         // Botones de resultados
         this.printReportBtn.addEventListener('click', () => this.imprimirReporte());
         this.exportPDFBtn.addEventListener('click', () => this.exportarPDF());
-        this.exportCSVBtn.addEventListener('click', () => this.exportarCSV());
         this.newReportBtn.addEventListener('click', () => this.nuevoReporte());
         
-        // Logout
+        /* Logout
         if (this.logoutBtn) {
             this.logoutBtn.addEventListener('click', () => AuthMiddleware.logout());
-        }
+        }*/
 
         // Eventos del sistema
         window.addEventListener('configuracionActualizada', () => {
@@ -135,58 +133,17 @@ class ReportesManager {
     }
 
     init() {
-        // Mostrar información del usuario
-        this.mostrarInfoUsuario();
+    
         
         // Cargar datos de configuración
         this.cargarDatosConfiguracion();
-        
-        // Actualizar fecha del footer
-        this.actualizarFechaFooter();
-        
-        // Inicializar actualizaciones automáticas
-        this.iniciarActualizaciones();
-        
-        console.log('ReportesManager inicializado correctamente');
-    }
-
-    mostrarInfoUsuario() {
-        if (this.userData) {
-            if (this.userNameElement) {
-                this.userNameElement.textContent = this.userData.name || this.userData.username || 'Usuario';
-            }
-            if (this.userDisplayElement && this.userData.name) {
-                this.userDisplayElement.querySelector('span').textContent = this.userData.name;
-            }
-        }
+    
     }
 
     cargarDatosConfiguracion() {
         // Cargar configuración desde localStorage para cálculos
         const config = JSON.parse(localStorage.getItem('configuracionCisterna')) || {};
         this.configuracion = config;
-    }
-
-    actualizarFechaFooter() {
-        if (this.footerDateElement) {
-            const now = new Date();
-            this.footerDateElement.textContent = now.toLocaleDateString('es-MX', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        }
-    }
-
-    iniciarActualizaciones() {
-        // Actualizar estado del sistema cada 30 segundos
-        setInterval(() => this.actualizarEstadoSistema(), 30000);
-        this.actualizarEstadoSistema();
-        
-        // Actualizar última actualización cada minuto
-        setInterval(() => this.actualizarUltimaActualizacion(), 60000);
-        this.actualizarUltimaActualizacion();
     }
 
     async actualizarEstadoSistema() {
@@ -200,41 +157,6 @@ class ReportesManager {
         } catch (error) {
             console.error('Error actualizando estado:', error);
             this.actualizarAlertas(null, true);
-        }
-    }
-
-    actualizarAlertas(nivel, error = false) {
-        if (!this.alertsList) return;
-        
-        let alertHTML = '';
-        if (error) {
-            alertHTML = `<div class="alert-item danger">
-                <i class="fas fa-exclamation-triangle"></i> Error de conexión
-            </div>`;
-        } else if (nivel <= 15) {
-            alertHTML = `<div class="alert-item danger">
-                <i class="fas fa-exclamation-circle"></i> Nivel crítico (${nivel}%)
-            </div>`;
-        } else if (nivel <= 30) {
-            alertHTML = `<div class="alert-item warning">
-                <i class="fas fa-exclamation-triangle"></i> Nivel bajo (${nivel}%)
-            </div>`;
-        } else if (nivel >= 95) {
-            alertHTML = `<div class="alert-item info">
-                <i class="fas fa-check-circle"></i> Cisterna casi llena (${nivel}%)
-            </div>`;
-        } else {
-            alertHTML = `<div class="alert-item success">
-                <i class="fas fa-check-circle"></i> Sistema normal (${nivel}%)
-            </div>`;
-        }
-        
-        this.alertsList.innerHTML = alertHTML;
-    }
-
-    actualizarUltimaActualizacion() {
-        if (this.lastRefreshElement) {
-            this.lastRefreshElement.textContent = new Date().toLocaleTimeString('es-MX');
         }
     }
 
@@ -792,48 +714,6 @@ class ReportesManager {
     exportarPDF() {
         this.mostrarMensaje('Exportando a PDF... (Funcionalidad en desarrollo)', 'info');
         // Implementar usando jsPDF o similar
-    }
-
-    exportarCSV() {
-        if (!this.currentReportData || !this.currentReportData.datos) {
-            this.mostrarMensaje('No hay datos para exportar', 'warning');
-            return;
-        }
-        
-        const datos = this.currentReportData.datos;
-        let csvContent = "data:text/csv;charset=utf-8,";
-        
-        // Encabezados
-        csvContent += "Fecha,Hora,Nivel(%),Volumen(L),Estado,Temperatura(°C)\n";
-        
-        // Datos
-        datos.forEach(registro => {
-            const fecha = new Date(registro.timestamp || registro.fecha);
-            const fechaStr = fecha.toLocaleDateString('es-MX');
-            const horaStr = fecha.toLocaleTimeString('es-MX');
-            const nivel = registro.level || registro.nivel || 0;
-            const capacidad = this.configuracion?.cisternaCapacidad || 10000;
-            const volumen = Math.round((nivel / 100) * capacidad);
-            const temperatura = registro.temperature || registro.temperatura || '';
-            
-            let estado = 'Normal';
-            if (nivel <= 15) estado = 'Crítico';
-            else if (nivel <= 30) estado = 'Bajo';
-            else if (nivel >= 95) estado = 'Lleno';
-            
-            csvContent += `${fechaStr},${horaStr},${nivel.toFixed(1)},${volumen},${estado},${temperatura}\n`;
-        });
-        
-        // Crear enlace de descarga
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `reporte_cisterna_${new Date().toISOString().split('T')[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        this.mostrarMensaje('CSV exportado exitosamente', 'success');
     }
 
     mostrarMensaje(mensaje, tipo = 'info') {

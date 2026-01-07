@@ -264,7 +264,7 @@ app.get('/api/reportes', async (req, res) => {
         // Obtener datos de MongoDB
         const datos = await LevelData.find(query)
             .sort({ timestamp: 1 })
-            .select('timestamp level temperature')
+            .select('sensor timestamp value estado ubicacion')
             .lean();
         
         // Si no hay datos, devolver array vacío
