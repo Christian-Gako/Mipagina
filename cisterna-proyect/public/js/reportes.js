@@ -6,8 +6,6 @@ class ReportesManager {
             return;
         }
         
-        // Inicializar propiedades
-        this.userData = AuthMiddleware.getUser();
         this.authToken = AuthMiddleware.getToken();
         this.currentReportType = null;
         this.currentReportData = null;
@@ -146,19 +144,7 @@ class ReportesManager {
         this.configuracion = config;
     }
 
-    async actualizarEstadoSistema() {
-        try {
-            const response = await fetch('/api/level');
-            if (!response.ok) throw new Error('Error en la respuesta');
-            
-            const data = await response.json();
-            this.actualizarAlertas(data.level);
-            
-        } catch (error) {
-            console.error('Error actualizando estado:', error);
-            this.actualizarAlertas(null, true);
-        }
-    }
+
 
     seleccionarTipoReporte(tipo) {
         this.currentReportType = tipo;
@@ -175,8 +161,6 @@ class ReportesManager {
         
         // Generar filtros según el tipo
         this.generarFiltros(tipo);
-        
-        this.mostrarMensaje(`Configura el reporte ${this.getNombreReporte(tipo)}`, 'info');
     }
 
     getNombreReporte(tipo) {
@@ -715,22 +699,75 @@ class ReportesManager {
         this.mostrarMensaje('Exportando a PDF... (Funcionalidad en desarrollo)', 'info');
         // Implementar usando jsPDF o similar
     }
-
+    
     mostrarMensaje(mensaje, tipo = 'info') {
-        if (!this.statusMessage || !this.messageContainer) return;
+        console.log(`${tipo.toUpperCase()}: ${mensaje}`);
         
-        this.statusMessage.textContent = mensaje;
-        this.statusMessage.className = `alert-item ${tipo}`;
-        this.messageContainer.style.display = 'block';
+        // Crear contenedor si no existe
+        let contenedor = document.getElementById('messageContainer');
+        if (!contenedor) {
+            contenedor = this.crearContenedorMensajes();
+        }
         
-        // Auto-ocultar después de 5 segundos (más para errores)
-        const tiempo = tipo === 'danger' ? 8000 : 5000;
+        const mensajeDiv = document.createElement('div');
+        mensajeDiv.className = `message ${tipo}`;
+        mensajeDiv.style.cssText = `
+            background: ${tipo === 'success' ? '#d4edda' : 
+                        tipo === 'warning' ? '#fff3cd' : 
+                        tipo === 'danger' ? '#f8d7da' : '#d1ecf1'};
+            color: ${tipo === 'success' ? '#155724' : 
+                    tipo === 'warning' ? '#856404' : 
+                    tipo === 'danger' ? '#721c24' : '#0c5460'};
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 4px solid ${tipo === 'success' ? '#28a745' : 
+                                tipo === 'warning' ? '#ffc107' : 
+                                tipo === 'danger' ? '#dc3545' : '#17a2b8'};
+            font-size: 0.9em;
+        `;
+        
+        const iconos = {
+            'success': 'fa-check-circle',
+            'warning': 'fa-exclamation-triangle',
+            'danger': 'fa-times-circle',
+            'info': 'fa-info-circle'
+        };
+        
+        mensajeDiv.innerHTML = `
+            <i class="fas ${iconos[tipo] || 'fa-info-circle'}"></i> ${mensaje}
+        `;
+        
+        contenedor.appendChild(mensajeDiv);
+        
+        // Auto-eliminar después de 5 segundos
         setTimeout(() => {
-            if (this.messageContainer) {
-                this.messageContainer.style.display = 'none';
+            if (mensajeDiv.parentNode) {
+                mensajeDiv.style.opacity = '0';
+                mensajeDiv.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => {
+                    if (mensajeDiv.parentNode) {
+                        mensajeDiv.parentNode.removeChild(mensajeDiv);
+                    }
+                }, 300);
             }
-        }, tiempo);
+        }, 5000);
     }
+
+    crearContenedorMensajes() {
+        const contenedor = document.createElement('div');
+        contenedor.id = 'messageContainer';
+        contenedor.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        `;
+        document.body.appendChild(contenedor);
+        return contenedor;
+    }
+
 }
 
 // Inicializar cuando el DOM esté listo

@@ -554,11 +554,13 @@ body {
 .btn-primary:hover {
     background: #2980b9;
     transform: translateY(-2px);
+    gap: 5px;
 }
 
 .btn-secondary {
     background: #95a5a6;
     color: white;
+    gap: 5px;
 }
 
 .btn-secondary:hover {
@@ -596,6 +598,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    margin-bottom: 5px;
 }
 
 .filter-group label {
@@ -750,6 +753,7 @@ body {
     .config-filters {
         flex-direction: column;
         align-items: stretch;
+        padding: 10px;
     }
     
     .history-table {

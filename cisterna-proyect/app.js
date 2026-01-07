@@ -203,16 +203,28 @@ async function cargarConfiguracionInicial() {
 // APIs EXISTENTES
 // ============================================
 
-
 app.get('/api/reportes', async (req, res) => {
     try {
+        // Verificar conexión a MongoDB primero
+        if (mongoose.connection.readyState !== 1) {
+            console.error('MongoDB no conectado');
+            return res.json([]); // Devolver array vacío
+        }
+        
         const { tipo, fecha, turno, semana, mes, inicio, fin, intervalo } = req.query;
         
         let query = {};
         let fechaInicio, fechaFin;
         
+        console.log('Parámetros recibidos para reportes:', {
+            tipo, fecha, turno, semana, mes, inicio, fin, intervalo
+        });
+        
         switch(tipo) {
             case 'daily':
+                if (!fecha) {
+                    return res.status(400).json({ error: 'Fecha requerida para reporte diario' });
+                }
                 fechaInicio = new Date(fecha);
                 fechaFin = new Date(fecha);
                 fechaFin.setDate(fechaFin.getDate() + 1);
@@ -234,6 +246,9 @@ app.get('/api/reportes', async (req, res) => {
                 break;
                 
             case 'weekly':
+                if (!semana) {
+                    return res.status(400).json({ error: 'Semana requerida para reporte semanal' });
+                }
                 // Parsear semana (formato YYYY-Www)
                 const [year, week] = semana.split('-W');
                 fechaInicio = new Date(year, 0, 1 + (week - 1) * 7);
@@ -242,40 +257,69 @@ app.get('/api/reportes', async (req, res) => {
                 break;
                 
             case 'monthly':
+                if (!mes) {
+                    return res.status(400).json({ error: 'Mes requerido para reporte mensual' });
+                }
                 fechaInicio = new Date(mes + '-01');
                 fechaFin = new Date(fechaInicio);
                 fechaFin.setMonth(fechaFin.getMonth() + 1);
                 break;
                 
             case 'custom':
+                if (!inicio || !fin) {
+                    return res.status(400).json({ error: 'Fechas de inicio y fin requeridas para reporte personalizado' });
+                }
                 fechaInicio = new Date(inicio);
                 fechaFin = new Date(fin);
                 break;
                 
             default:
-                return res.status(400).json({ error: 'Tipo de reporte no válido' });
+                return res.status(400).json({ error: 'Tipo de reporte no válido. Use: daily, weekly, monthly o custom' });
         }
         
+        // Formatear fechas para consulta MongoDB
         query.timestamp = {
             $gte: fechaInicio,
             $lt: fechaFin
         };
         
-        // Obtener datos de MongoDB
-        const datos = await LevelData.find(query)
+        console.log('Consultando WaterLevel con query:', {
+            timestamp: {
+                $gte: fechaInicio.toISOString(),
+                $lt: fechaFin.toISOString()
+            }
+        });
+        
+        // CORREGIDO: Usar el modelo WaterLevel en lugar de la colección directamente
+        const datos = await WaterLevel.find(query)
             .sort({ timestamp: 1 })
-            .select('sensor timestamp value estado ubicacion')
+            .select('sensor value timestamp estado ubicacion')  // value en lugar de level
+            .maxTimeMS(30000)
             .lean();
         
+        console.log(`Encontrados ${datos.length} registros en WaterLevel`);
+        
+        // Formatear datos para el frontend
+        const datosFormateados = datos.map(d => ({
+            id: d._id,
+            timestamp: d.timestamp,
+            level: d.value,  // Mapear 'value' a 'level' para el frontend
+            estado: d.estado || 'Normal',
+            ubicacion: d.ubicacion || 'No especificada',
+            sensor: d.sensor || 'Desconocido',
+            // Agregar campos adicionales si existen
+            volumen: d.volumen
+        }));
+        
         // Si no hay datos, devolver array vacío
-        res.json(datos || []);
+        res.json(datosFormateados);
         
     } catch (error) {
         console.error('Error en endpoint de reportes:', error);
-        res.status(500).json({ error: 'Error al generar reporte' });
+        // En caso de error, devolver array vacío
+        res.json([]);
     }
 });
-
 app.get('/api/level', async (req, res) => {
     try {
         if (mongoose.connection.readyState !== 1) {
