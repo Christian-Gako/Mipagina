@@ -736,7 +736,7 @@ app.post('/api/esp32/data', async (req, res) => {
 async function iniciarServidor() {
     
     app.listen(port, () => {
-        console.log(`Servidor Node.js activo en http://${host}`);
+        console.log(`Escuchando puerto`);
 
     });
     await cargarConfiguracionInicial();
