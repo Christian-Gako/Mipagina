@@ -20,9 +20,8 @@ app.use('/api/auth', authRoutes);
 const port = process.env.PORT;
 
 // ========== RUTAS PARA PÁGINAS ==========
-app.get('/diagnostico', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'diagnostico.html'));
-});
+
+
 app.get(['/','/login'], (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
@@ -41,6 +40,8 @@ app.get('/configuracion', (req, res) => {
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+
 mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -61,6 +62,7 @@ mongoose.connect(MONGODB_URI, {
 
 // Modelo WaterLevel
 const WaterLevelSchema = new mongoose.Schema({
+    
     sensor: { 
         type: String, 
         required: true,
@@ -681,7 +683,7 @@ app.get('/api/records/export', async (req, res) => {
 // ENDPOINTS DE PRUEBA
 // ============================================
 
-app.get('/test', (req, res) => {
+app.get('/api/test', (req, res) => {
     res.json({ 
         message: 'Servidor funcionando',
         mongodb: mongoose.connection.readyState === 1 ? 'Conectado' : 'No Conectado'});
@@ -734,7 +736,7 @@ app.post('/api/esp32/data', async (req, res) => {
 async function iniciarServidor() {
     
     app.listen(port, () => {
-        console.log(`📊 Frecuencia de muestreo: ${intervaloMuestreo}ms`);
+        console.log(`Servidor Node.js activo en http://${host}`);
 
     });
     await cargarConfiguracionInicial();

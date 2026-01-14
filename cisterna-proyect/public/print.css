@@ -1,0 +1,230 @@
+/* print.css - Estilos para impresión de reportes */
+
+@media print {
+    /* Ocultar elementos que no deben imprimirse */
+    .header,
+    .sidebar,
+    .footer,
+    .report-type-selector,
+    .report-configuration,
+    .preview-header,
+    .preview-actions-footer,
+    .config-actions,
+    .report-actions,
+    .main-nav,
+    .alert-panel,
+    .btn,
+    button,
+    .no-print {
+        display: none !important;
+    }
+    
+    /* Estilos generales para impresión */
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 12pt !important;
+        line-height: 1.5 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .content-area,
+    .report-preview,
+    .preview-content,
+    .report-template {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        overflow: visible !important;
+        max-height: none !important;
+    }
+    
+    /* Optimizar el template del reporte para impresión */
+    .report-template {
+        background: white !important;
+        padding: 20px !important;
+        font-family: "Times New Roman", Times, serif !important;
+    }
+    
+    .report-header-template {
+        page-break-after: avoid;
+        margin-bottom: 20px !important;
+    }
+    
+    .report-title-area h1 {
+        font-size: 24pt !important;
+        color: black !important;
+    }
+    
+    .report-title-area h2 {
+        font-size: 14pt !important;
+        color: #666 !important;
+    }
+    
+    .report-logo .logo-placeholder {
+        background: white !important;
+        border: 2px solid #000 !important;
+        color: black !important;
+        font-size: 24pt !important;
+    }
+    
+    /* Mejorar legibilidad de texto */
+    .cisterna-info-template,
+    .stats-template,
+    .analysis-section,
+    .stat-item {
+        background: white !important;
+        border: 1px solid #ddd !important;
+        page-break-inside: avoid;
+    }
+    
+    /* Tablas optimizadas para impresión */
+    .data-table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+        font-size: 10pt !important;
+        page-break-inside: avoid;
+    }
+    
+    .data-table th {
+        background: #f0f0f0 !important;
+        color: black !important;
+        border: 1px solid #ddd !important;
+        padding: 8px !important;
+    }
+    
+    .data-table td {
+        border: 1px solid #ddd !important;
+        padding: 6px !important;
+    }
+    
+    .data-table tr:nth-child(even) {
+        background: #f9f9f9 !important;
+    }
+    
+    /* Quitar colores de fondo de badges */
+    .status-badge {
+        background: white !important;
+        border: 1px solid #000 !important;
+        color: black !important;
+        padding: 2px 6px !important;
+        font-size: 9pt !important;
+    }
+    
+    /* Mejorar estadísticas */
+    .stats-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 10px !important;
+        margin-bottom: 20px !important;
+    }
+    
+    .stat-item {
+        border: 1px solid #000 !important;
+        padding: 10px !important;
+    }
+    
+    .stat-value {
+        font-size: 14pt !important;
+        color: black !important;
+    }
+    
+    /* Control de saltos de página */
+    .analysis-template,
+    .data-table-template {
+        page-break-inside: avoid;
+    }
+    
+    h1, h2, h3, h4 {
+        page-break-after: avoid;
+    }
+    
+    /* Pie de página fijo en cada página impresa */
+    .report-footer-template {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        border-top: 1px solid #000 !important;
+        padding-top: 10px !important;
+        margin-top: 30px !important;
+    }
+    
+    /* Encabezado fijo en cada página */
+    .report-header-template {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: white !important;
+        z-index: 1000;
+    }
+    
+    /* Ajustar contenido principal para evitar solapamiento */
+    .preview-content {
+        margin-top: 100px !important;
+        margin-bottom: 50px !important;
+    }
+    
+    /* Links en negro para impresión */
+    a {
+        color: black !important;
+        text-decoration: underline !important;
+    }
+    
+    /* Imprimir URLs después de los links */
+    a[href]:after {
+        content: " (" attr(href) ")";
+        font-size: 9pt;
+        color: #666;
+    }
+    
+    /* No imprimir URLs en ciertos casos */
+    a[href^="#"]:after,
+    a[href^="javascript:"]:after {
+        content: "";
+    }
+    
+    /* Forzar fondos blancos */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* Evitar que las tablas se corten */
+    table {
+        page-break-inside: auto;
+    }
+    
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+    
+    /* Margenes de página */
+    @page {
+        margin: 1.5cm;
+        size: A4 portrait;
+    }
+    
+    @page :first {
+        margin-top: 3cm;
+    }
+    
+    /* Clases utilitarias para impresión */
+    .print-only {
+        display: block !important;
+    }
+    
+    .no-break {
+        page-break-inside: avoid;
+    }
+    
+    .page-break {
+        page-break-before: always;
+    }
+}

@@ -1,7 +1,4 @@
 // login.js - VERSIÓN CORREGIDA
-const API_URL = 'https://simona-abno.onrender.com/api';
-
-// Elementos del DOM
 const loginForm = document.getElementById('loginForm');
 const loginBtn = document.getElementById('loginBtn');
 const btnText = document.getElementById('btnText');
@@ -10,6 +7,7 @@ const alertMessage = document.getElementById('alertMessage');
 const togglePassword = document.getElementById('togglePassword');
 const passwordInput = document.getElementById('password');
 
+const API_URL = '/api';
 // Mostrar/ocultar contraseña
 togglePassword.addEventListener('click', function() {
     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
@@ -56,7 +54,7 @@ loginForm.addEventListener('submit', async function(e) {
                 username, 
                 password 
             }),
-            signal: AbortSignal.timeout(10000)
+            signal: AbortSignal.timeout(20000)
         });
         
         
@@ -81,7 +79,7 @@ loginForm.addEventListener('submit', async function(e) {
             
             // Redirigir después de 1 segundo
             setTimeout(() => {
-                window.location.href = '/dashboard';
+                window.location.href = '/index.html';
             }, 1000);
             
         } else {
@@ -118,7 +116,7 @@ function showAlert(message, type = 'error') {
     alertMessage.className = `alert alert-${type}`;
     alertMessage.style.display = 'block';
     
-    const hideTime = type === 'success' ? 2000 : 5000;
+    const hideTime = type === 'success' ? 5000 : 8000;
     setTimeout(() => {
         if (alertMessage.textContent === message) {
             alertMessage.style.display = 'none';

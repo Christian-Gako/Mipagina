@@ -1,6 +1,7 @@
 // auth-middleware.js
 class AuthMiddleware {
-    static API_URL = 'https://simona-abno.onrender.com/api';
+    API_URL = process.env.API_URL;
+    
 
     // Verificar si el usuario está autenticado (solo local)
     static isAuthenticated() {
@@ -134,7 +135,7 @@ class AuthMiddleware {
     static redirectToLogin() {
         // Limpiar sesión primero
         this.clearSession();
-        const rootUrl = window.location.origin + '/login';
+        const rootUrl = window.location.origin + '/login.html';
         // Usar location.replace para evitar que quede en el historial
         window.location.replace(rootUrl);
     }

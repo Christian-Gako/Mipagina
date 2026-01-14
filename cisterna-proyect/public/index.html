@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Sistema de Monitoreo</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">-->
 </head>
 <body>
     <div class="dashboard">
@@ -19,16 +19,16 @@
         <main class="main-content">
             <aside class="sidebar">
                 <nav class="main-nav">
-                    <a href="/dashboard" class="nav-btn active">
+                    <a href="/index.html" class="nav-btn active">
                         <i class="fas fa-chart-bar"></i> Dashboard
                     </a>
-                    <a href="/reportes" class="nav-btn">
+                    <a href="/reportes.html" class="nav-btn">
                         <i class="fas fa-chart-line"></i> Reportes
                     </a>
-                    <a href="/historial" class="nav-btn">
+                    <a href="/historial.html" class="nav-btn">
                         <i class="fas fa-history"></i> Historial
                     </a>
-                    <a href="/configuracion" class="nav-btn">
+                    <a href="/configuracion.html" class="nav-btn">
                         <i class="fas fa-cog"></i> Configuración
                     </a>
                 </nav>
@@ -61,7 +61,7 @@
                                     <div class="stats-container">
                                         <div class="stats-grid">
                                             <div class="stat-card wide">
-                                                <div class="stat-icon">🕒</div>
+                                                <div class="stat-icon"><i class="far fa-clock"></i></div>
                                                 <div class="stat-info">
                                                     <span class="stat-value" id="lastUpdate">9:47:05 a.m.</span>
                                                     <span class="stat-label">Última Actualización</span>
@@ -69,7 +69,7 @@
                                             </div>
                                             
                                             <div class="stat-card wide">
-                                                <div class="stat-icon">⚠️</div>
+                                                <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
                                                 <div class="stat-info">
                                                     <span class="stat-value" id="status">Normal</span>
                                                     <span class="stat-label">Estado del Sistema</span>
@@ -86,7 +86,7 @@
                                         <!-- Columna 1: Datos de la Cisterna -->
                                         <div class="info-column">
                                             <div class="info-group">
-                                                <h3>🏗️ Datos de la Cisterna</h3>
+                                                <h3><i class="fas fa-tint"></i> Datos de la Cisterna</h3>
                                 <div class="info-item-compact">
                                         <span class="info-label">Nombre:</span>
                                         <span class="info-value" id="config-cisternaNombre">...</span>
@@ -109,7 +109,7 @@
                                 <!-- Columna 2: Datos del Sensor -->
                         <div class="info-column">
                             <div class="info-group">
-                                <h3>📡 Datos del Sensor</h3>
+                                <h3><i class="fas fa-satellite-dish"></i>  Datos del Sensor</h3>
                                 <div class="info-item-compact">
                                         <span class="info-label">Modelo:</span>
                                     <span class="info-value" id="config-sensorModelo">...</span>
@@ -122,32 +122,21 @@
                                     <span class="info-label">Instalación:</span>
                                     <span class="info-value" id="config-sensorInstalacion">...</span>
                                 </div>
-                                <div class="info-item-compact">
-                                    <span class="info-label">Precisión:</span>
-                                    <span class="info-value" id="config-sensorPrecision">...</span>
-                                </div>
                             </div>
                         </div>
 
                         <!-- Columna 3: Configuración del Sistema -->
                         <div class="info-column">
                             <div class="info-group">
-                                <h3>🌐 Configuración del Sistema</h3>
+                                <h3><i class="fas fa-server"></i> Configuración del Sistema</h3>
                                 <div class="info-item-compact">
                                     <span class="info-label">Frecuencia de Muestreo:</span>
                                     <span class="info-value" id="config-frecuenciaMuestreo">...</span>
                                 </div>
-                                <div class="info-item-compact">
-                                    <span class="info-label">Base de Datos:</span>
-                                    <span class="info-value" id="config-database-type">...</span>
-                                </div>
-                                <div class="info-item-compact">
-                                    <span class="info-label">Plataforma IoT:</span>
-                                    <span class="info-value" id="config-iot-platform">...</span>
-                                </div>
+                                
                                 <div class="info-item-compact">
                                     <span class="info-label">Versión del Sistema:</span>
-                                    <span class="info-value" id="config-system-version">...</span>
+                                    <span class="info-value" id="config-system-version">V1.0</span>
                                 </div>
                             </div>
                         </div>

@@ -1,72 +1,54 @@
 // reportes.js - Sistema Completo de Reportes
 class ReportesManager {
     constructor() {
-        // Validar sesión
-        if (!this.validarSesion()) {
-            return;
-        }
+        if (!this.validarSesion()) return;
         
         this.authToken = AuthMiddleware.getToken();
         this.currentReportType = null;
         this.currentReportData = null;
-        this.chart = null;
+        this.selectedTemplate = 'standard'; // Plantilla por defecto
         
-        // Configurar elementos
         this.setupElements();
         this.setupEventListeners();
         this.setupAuthInterceptor();
-        this.init();
+        this.cargarDatosConfiguracion();
     }
 
+    // ========== INICIALIZACIÓN ==========
     validarSesion() {
-        // Verificar si está autenticado usando el middleware
         if (typeof AuthMiddleware === 'undefined') {
             console.error('AuthMiddleware no está cargado');
             return false;
         }
-        
-        if (!AuthMiddleware.protectPage()) {
-            return false;
-        }
-        
-        return true;
+        return AuthMiddleware.protectPage();
     }
 
     setupElements() {
         // Elementos principales
         this.reportCards = document.querySelectorAll('.report-card');
         this.reportConfig = document.getElementById('reportConfig');
-        this.reportResults = document.getElementById('reportResults');
+        this.reportPreview = document.getElementById('reportPreview');
         this.filtersContainer = document.getElementById('filtersContainer');
+        this.reportPaper = document.getElementById('reportPaper');
+        this.templateSelection = document.getElementById('templateSelection');
         
-        // Botones
+        // Botones principales
         this.generateReportBtn = document.getElementById('generateReport');
+        this.previewReportBtn = document.getElementById('previewReport');
         this.cancelConfigBtn = document.getElementById('cancelConfig');
-        this.printReportBtn = document.getElementById('printReport');
-        this.exportPDFBtn = document.getElementById('exportPDF');
-        this.newReportBtn = document.getElementById('newReport');
-    
+        this.downloadPDFBtn = document.getElementById('downloadPDF');
+        this.printPreviewBtn = document.getElementById('printPreview');
+        this.editConfigBtn = document.getElementById('editConfig');
+        this.finalizeReportBtn = document.getElementById('finalizeReport');
+        this.closePreviewBtn = document.getElementById('closePreview');
         
-        // Elementos de resultados
-        this.avgLevelElement = document.getElementById('avgLevel');
-        this.minLevelElement = document.getElementById('minLevel');
-        this.maxLevelElement = document.getElementById('maxLevel');
-        this.consumptionElement = document.getElementById('consumption');
-        this.reportTitleElement = document.getElementById('reportTitle');
-        this.reportDateRangeElement = document.getElementById('reportDateRange');
-        this.reportTableBody = document.getElementById('reportTableBody');
-        this.chartCanvas = document.getElementById('reportChart');
+        // Template cards
+        this.templateCards = document.querySelectorAll('.template-card');
         
-        // Mensajes y alertas
-        this.messageContainer = document.getElementById('messageContainer');
-        this.statusMessage = document.getElementById('statusMessage');
-        this.alertsList = document.getElementById('alertsList');
-        this.lastRefreshElement = document.getElementById('lastRefresh');
-        this.userNameElement = document.getElementById('userName');
-        this.userDisplayElement = document.getElementById('userDisplay');
-        
-        // Fecha del footer
-        this.footerDateElement = document.getElementById('footerDate');
+        // Ocultar sección de plantillas desde el inicio
+        if (this.templateSelection) {
+            this.templateSelection.style.display = 'none';
+        }
     }
 
     setupEventListeners() {
@@ -80,17 +62,15 @@ class ReportesManager {
 
         // Botones de configuración
         this.generateReportBtn.addEventListener('click', () => this.generarReporte());
+        this.previewReportBtn.addEventListener('click', () => this.generarVistaPrevia());
         this.cancelConfigBtn.addEventListener('click', () => this.cancelarConfiguracion());
 
-        // Botones de resultados
-        this.printReportBtn.addEventListener('click', () => this.imprimirReporte());
-        this.exportPDFBtn.addEventListener('click', () => this.exportarPDF());
-        this.newReportBtn.addEventListener('click', () => this.nuevoReporte());
-        
-        /* Logout
-        if (this.logoutBtn) {
-            this.logoutBtn.addEventListener('click', () => AuthMiddleware.logout());
-        }*/
+        // Botones de vista previa
+        if (this.downloadPDFBtn) this.downloadPDFBtn.addEventListener('click', () => this.exportarPDF());
+        if (this.printPreviewBtn) this.printPreviewBtn.addEventListener('click', () => this.imprimirReporte());
+        if (this.editConfigBtn) this.editConfigBtn.addEventListener('click', () => this.editarConfiguracion());
+        if (this.finalizeReportBtn) this.finalizeReportBtn.addEventListener('click', () => this.finalizarReporte());
+        if (this.closePreviewBtn) this.closePreviewBtn.addEventListener('click', () => this.cerrarVistaPrevia());
 
         // Eventos del sistema
         window.addEventListener('configuracionActualizada', () => {
@@ -103,7 +83,6 @@ class ReportesManager {
         const authToken = this.authToken;
 
         window.fetch = async (url, options = {}) => {
-            // Agregar token a las peticiones (excepto login y auth)
             if (authToken && !url.includes('/auth/') && !url.includes('login')) {
                 options.headers = {
                     ...options.headers,
@@ -114,14 +93,9 @@ class ReportesManager {
 
             try {
                 const response = await originalFetch(url, options);
-
-                // Si la respuesta es 401 o 403, hacer logout
                 if (response.status === 401 || response.status === 403) {
-                    console.warn('Sesión expirada, redirigiendo al login...');
                     AuthMiddleware.redirectToLogin();
-                    return response;
                 }
-
                 return response;
             } catch (error) {
                 console.error('Error en la petición:', error);
@@ -130,77 +104,40 @@ class ReportesManager {
         };
     }
 
-    init() {
-    
-        
-        // Cargar datos de configuración
-        this.cargarDatosConfiguracion();
-    
-    }
-
     cargarDatosConfiguracion() {
-        // Cargar configuración desde localStorage para cálculos
         const config = JSON.parse(localStorage.getItem('configuracionCisterna')) || {};
         this.configuracion = config;
     }
 
-
-
+    // ========== GESTIÓN DE REPORTES ==========
     seleccionarTipoReporte(tipo) {
         this.currentReportType = tipo;
         
-        // Quitar selección anterior
+        // Actualizar selección visual
         this.reportCards.forEach(card => card.classList.remove('selected'));
-        
-        // Agregar selección actual
         document.querySelector(`.report-card[data-report="${tipo}"]`).classList.add('selected');
         
         // Mostrar configuración
         this.reportConfig.style.display = 'block';
-        this.reportResults.style.display = 'none';
+        this.reportPreview.style.display = 'none';
         
-        // Generar filtros según el tipo
+        // Generar filtros
         this.generarFiltros(tipo);
     }
-
-    getNombreReporte(tipo) {
-        const nombres = {
-            'daily': 'Diario',
-            'weekly': 'Semanal',
-            'monthly': 'Mensual',
-            'custom': 'Personalizado'
-        };
-        return nombres[tipo] || tipo;
-    }
+    
 
     generarFiltros(tipo) {
         let filtrosHTML = '';
+        
+        const hoy = new Date();
+        const fechaHoy = hoy.toISOString().split('T')[0];
         
         switch(tipo) {
             case 'daily':
                 filtrosHTML = `
                     <div class="filter-group">
                         <label for="fechaReporte"><i class="fas fa-calendar"></i> Fecha:</label>
-                        <input type="date" id="fechaReporte" class="form-control" 
-                               value="${new Date().toISOString().split('T')[0]}">
-                    </div>
-                    <div class="filter-group">
-                        <label for="turnoReporte"><i class="fas fa-clock"></i> Turno:</label>
-                        <select id="turnoReporte" class="form-control">
-                            <option value="complete">Día completo</option>
-                            <option value="morning">Mañana (6:00-14:00)</option>
-                            <option value="afternoon">Tarde (14:00-22:00)</option>
-                            <option value="night">Noche (22:00-6:00)</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="detalleReporte"><i class="fas fa-chart-bar"></i> Nivel de detalle:</label>
-                        <select id="detalleReporte" class="form-control">
-                            <option value="hourly">Por hora</option>
-                            <option value="30min">Cada 30 minutos</option>
-                            <option value="15min">Cada 15 minutos</option>
-                            <option value="5min">Cada 5 minutos</option>
-                        </select>
+                        <input type="date" id="fechaReporte" class="form-control" value="${fechaHoy}">
                     </div>
                 `;
                 break;
@@ -209,75 +146,40 @@ class ReportesManager {
                 filtrosHTML = `
                     <div class="filter-group">
                         <label for="semanaReporte"><i class="fas fa-calendar-week"></i> Semana:</label>
-                        <input type="week" id="semanaReporte" class="form-control"
-                               value="${this.getCurrentWeek()}">
-                    </div>
-                    <div class="filter-group">
-                        <label for="tipoGrafico"><i class="fas fa-chart-line"></i> Tipo de gráfico:</label>
-                        <select id="tipoGrafico" class="form-control">
-                            <option value="line">Líneas</option>
-                            <option value="bar">Barras</option>
-                            <option value="area">Área</option>
-                        </select>
+                        <input type="week" id="semanaReporte" class="form-control" value="${this.getCurrentWeek()}">
                     </div>
                 `;
                 break;
                 
             case 'monthly':
+                const mesActual = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`;
                 filtrosHTML = `
                     <div class="filter-group">
                         <label for="mesReporte"><i class="fas fa-calendar-alt"></i> Mes:</label>
-                        <input type="month" id="mesReporte" class="form-control"
-                               value="${new Date().toISOString().substring(0, 7)}">
-                    </div>
-                    <div class="filter-group">
-                        <label for="comparativa"><i class="fas fa-balance-scale"></i> Comparar con:</label>
-                        <select id="comparativa" class="form-control">
-                            <option value="none">No comparar</option>
-                            <option value="previous">Mes anterior</option>
-                            <option value="average">Promedio anual</option>
-                        </select>
+                        <input type="month" id="mesReporte" class="form-control" value="${mesActual}">
                     </div>
                 `;
                 break;
                 
             case 'custom':
+                const fechaManana = new Date(hoy);
+                fechaManana.setDate(fechaManana.getDate() + 1);
+                const fechaMananaStr = fechaManana.toISOString().split('T')[0];
+                
                 filtrosHTML = `
                     <div class="filter-group">
-                        <label for="fechaInicio"><i class="fas fa-calendar-plus"></i> Fecha inicio:</label>
-                        <input type="datetime-local" id="fechaInicio" class="form-control"
-                               value="${new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().substring(0, 16)}">
+                        <label for="fechaInicio"><i class="fas fa-calendar"></i> Fecha inicio:</label>
+                        <input type="date" id="fechaInicio" class="form-control" value="${fechaHoy}">
                     </div>
                     <div class="filter-group">
-                        <label for="fechaFin"><i class="fas fa-calendar-minus"></i> Fecha fin:</label>
-                        <input type="datetime-local" id="fechaFin" class="form-control"
-                               value="${new Date().toISOString().substring(0, 16)}">
-                    </div>
-                    <div class="filter-group">
-                        <label for="intervaloCustom"><i class="fas fa-ruler"></i> Intervalo (minutos):</label>
-                        <input type="number" id="intervaloCustom" class="form-control" 
-                               min="1" max="1440" value="30">
-                    </div>
-                    <div class="filter-group checkbox-group">
-                        <label>
-                            <input type="checkbox" id="incluirTemperatura" checked>
-                            <i class="fas fa-thermometer-half"></i> Incluir temperatura
-                        </label>
-                        <label>
-                            <input type="checkbox" id="incluirAlertas" checked>
-                            <i class="fas fa-bell"></i> Incluir eventos de alerta
-                        </label>
+                        <label for="fechaFin"><i class="fas fa-calendar"></i> Fecha fin:</label>
+                        <input type="date" id="fechaFin" class="form-control" value="${fechaMananaStr}">
                     </div>
                 `;
                 break;
         }
         
         this.filtersContainer.innerHTML = filtrosHTML;
-        
-        // Inicializar datepickers si es necesario
-        if (tipo === 'custom') {
-            this.inicializarDatePickers();
-        }
     }
 
     getCurrentWeek() {
@@ -285,56 +187,62 @@ class ReportesManager {
         const startOfYear = new Date(now.getFullYear(), 0, 1);
         const pastDaysOfYear = (now - startOfYear) / 86400000;
         const weekNumber = Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
-        return `${now.getFullYear()}-W${weekNumber.toString().padStart(2, '0')}`;
+        return `${now.getFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
     }
 
-    inicializarDatePickers() {
-        // Configurar Flatpickr para mejores selectores de fecha/hora
-        flatpickr("#fechaInicio", {
-            enableTime: true,
-            dateFormat: "Y-m-d H:i",
-            locale: "es",
-            time_24hr: true
-        });
-        
-        flatpickr("#fechaFin", {
-            enableTime: true,
-            dateFormat: "Y-m-d H:i",
-            locale: "es",
-            time_24hr: true
-        });
-    }
-
+    // ========== GENERACIÓN DE REPORTE ==========
     async generarReporte() {
         try {
             this.mostrarMensaje('Generando reporte...', 'info');
             
-            // Obtener parámetros del formulario
             const parametros = this.obtenerParametros();
+            if (!this.validarParametros(parametros)) return;
             
-            // Validar parámetros
-            if (!this.validarParametros(parametros)) {
-                this.mostrarMensaje('Por favor completa todos los campos requeridos', 'warning');
-                return;
-            }
-            
-            // Ocultar configuración, mostrar loading
-            this.reportConfig.style.display = 'none';
-            this.mostrarMensaje('Recopilando datos del servidor...', 'info');
-            
-            // Obtener datos del servidor
+            // Obtener datos
             const datos = await this.obtenerDatosReporte(parametros);
             
             // Procesar datos
-            const reporte = this.procesarDatosReporte(datos, parametros);
+            this.currentReportData = {
+                estadisticas: this.calcularEstadisticas(datos),
+                datos: datos,
+                parametros: parametros,
+                timestamp: new Date().toISOString()
+            };
             
-            // Mostrar resultados
-            this.mostrarResultados(reporte, parametros);
-            
+            // Mostrar vista previa
+            this.mostrarVistaPrevia();
             this.mostrarMensaje('Reporte generado exitosamente', 'success');
             
         } catch (error) {
             console.error('Error generando reporte:', error);
+            this.mostrarMensaje(`Error: ${error.message}`, 'danger');
+        }
+    }
+
+    async generarVistaPrevia() {
+        try {
+            this.mostrarMensaje('Generando vista previa...', 'info');
+            
+            const parametros = this.obtenerParametros();
+            if (!this.validarParametros(parametros)) return;
+            
+            // Obtener datos
+            const datos = await this.obtenerDatosReporte(parametros);
+            
+            // Procesar datos
+            this.currentReportData = {
+                estadisticas: this.calcularEstadisticas(datos),
+                datos: datos,
+                parametros: parametros,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Mostrar vista previa
+            this.mostrarVistaPrevia();
+            this.mostrarMensaje('Vista previa generada', 'success');
+            
+        } catch (error) {
+            console.error('Error generando vista previa:', error);
             this.mostrarMensaje(`Error: ${error.message}`, 'danger');
         }
     }
@@ -345,27 +253,25 @@ class ReportesManager {
         
         switch(tipo) {
             case 'daily':
-                parametros.fecha = document.getElementById('fechaReporte').value;
-                parametros.turno = document.getElementById('turnoReporte').value;
-                parametros.detalle = document.getElementById('detalleReporte').value;
+                const fechaInput = document.getElementById('fechaReporte');
+                if (fechaInput) parametros.fecha = fechaInput.value;
                 break;
                 
             case 'weekly':
-                parametros.semana = document.getElementById('semanaReporte').value;
-                parametros.grafico = document.getElementById('tipoGrafico').value;
+                const semanaInput = document.getElementById('semanaReporte');
+                if (semanaInput) parametros.semana = semanaInput.value;
                 break;
                 
             case 'monthly':
-                parametros.mes = document.getElementById('mesReporte').value;
-                parametros.comparativa = document.getElementById('comparativa').value;
+                const mesInput = document.getElementById('mesReporte');
+                if (mesInput) parametros.mes = mesInput.value;
                 break;
                 
             case 'custom':
-                parametros.inicio = document.getElementById('fechaInicio').value;
-                parametros.fin = document.getElementById('fechaFin').value;
-                parametros.intervalo = parseInt(document.getElementById('intervaloCustom').value);
-                parametros.temperatura = document.getElementById('incluirTemperatura').checked;
-                parametros.alertas = document.getElementById('incluirAlertas').checked;
+                const inicioInput = document.getElementById('fechaInicio');
+                const finInput = document.getElementById('fechaFin');
+                if (inicioInput) parametros.inicio = inicioInput.value;
+                if (finInput) parametros.fin = finInput.value;
                 break;
         }
         
@@ -373,81 +279,96 @@ class ReportesManager {
     }
 
     validarParametros(parametros) {
-        if (!parametros.tipo) return false;
+        if (!parametros.tipo) {
+            this.mostrarMensaje('Selecciona un tipo de reporte', 'warning');
+            return false;
+        }
         
-        switch(parametros.tipo) {
-            case 'custom':
-                if (!parametros.inicio || !parametros.fin) return false;
-                if (new Date(parametros.inicio) >= new Date(parametros.fin)) {
-                    this.mostrarMensaje('La fecha de inicio debe ser anterior a la fecha fin', 'warning');
-                    return false;
-                }
-                break;
+        if (parametros.tipo === 'custom') {
+            if (!parametros.inicio || !parametros.fin) {
+                this.mostrarMensaje('Completa ambas fechas', 'warning');
+                return false;
+            }
+            if (new Date(parametros.inicio) >= new Date(parametros.fin)) {
+                this.mostrarMensaje('La fecha inicio debe ser anterior a la fecha fin', 'warning');
+                return false;
+            }
         }
         
         return true;
     }
-
+    
     async obtenerDatosReporte(parametros) {
-        let url = '/api/reportes';
-        const queryParams = new URLSearchParams();
-        
-        queryParams.append('tipo', parametros.tipo);
-        
-        switch(parametros.tipo) {
-            case 'daily':
-                queryParams.append('fecha', parametros.fecha);
-                queryParams.append('turno', parametros.turno);
-                break;
-                
-            case 'weekly':
-                queryParams.append('semana', parametros.semana);
-                break;
-                
-            case 'monthly':
-                queryParams.append('mes', parametros.mes);
-                if (parametros.comparativa !== 'none') {
-                    queryParams.append('comparar', parametros.comparativa);
-                }
-                break;
-                
-            case 'custom':
-                queryParams.append('inicio', parametros.inicio);
-                queryParams.append('fin', parametros.fin);
-                queryParams.append('intervalo', parametros.intervalo);
-                queryParams.append('temperatura', parametros.temperatura);
-                queryParams.append('alertas', parametros.alertas);
-                break;
+        if (!parametros) {
+            throw new Error('Parámetros no definidos');
         }
         
-        url += `?${queryParams.toString()}`;
-        
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${this.authToken}`
+        try {
+            let url = '/api/reportes';
+            const queryParams = new URLSearchParams();
+            queryParams.append('tipo', parametros.tipo);
+            
+            // Construir URL según tipo de reporte
+            switch(parametros.tipo) {
+                case 'daily':
+                    if (parametros.fecha) queryParams.append('fecha', parametros.fecha);
+                    break;
+                case 'weekly':
+                    if (parametros.semana) queryParams.append('semana', parametros.semana);
+                    break;
+                case 'monthly':
+                    if (parametros.mes) queryParams.append('mes', parametros.mes);
+                    break;
+                case 'custom':
+                    if (parametros.inicio) queryParams.append('inicio', parametros.inicio);
+                    if (parametros.fin) queryParams.append('fin', parametros.fin);
+                    break;
             }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Error del servidor: ${response.status}`);
+            
+            url += `?${queryParams.toString()}`;
+            
+            const response = await fetch(url, {
+                headers: { 
+                    'Authorization': `Bearer ${this.authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Error del servidor: ${response.status}`);
+            }
+            
+            const datos = await response.json();
+            
+            // Transformar datos a formato esperado
+            return this.transformarDatos(datos);
+            
+        } catch (error) {
+            this.mostrarMensaje('Error obteniendo datos de la base de datos', 'danger');
+            throw error;
         }
-        
-        return await response.json();
     }
 
-    procesarDatosReporte(datos, parametros) {
-        // Aquí procesas los datos crudos del servidor
-        const reporte = {
-            estadisticas: this.calcularEstadisticas(datos),
-            datos: datos,
-            parametros: parametros,
-            timestamp: new Date().toISOString()
-        };
+    transformarDatos(datosAPI) {
+        // Transformar de tu formato MongoDB a formato esperado por el sistema
+        if (!Array.isArray(datosAPI)) {
+            return [];
+        }
         
-        // Guardar en memoria para exportación
-        this.currentReportData = reporte;
-        
-        return reporte;
+        return datosAPI.map(item => {
+            // Extraer la fecha del formato MongoDB
+            const timestamp = item.timestamp?.$date || item.timestamp;
+            
+            return {
+                timestamp: timestamp,
+                level: item.value || 0,  // "value" en tu DB es el nivel
+                nivel: item.value || 0,   // También como "nivel" para compatibilidad
+                volumen: item.volumen || 0,
+                estado: item.estado || 'Normal',
+                ubicacion: item.ubicacion || 'Cisterna Desconocida',
+                sensor: item.sensor || 'No se pudo obtener'
+            };
+        });
     }
 
     calcularEstadisticas(datos) {
@@ -457,257 +378,386 @@ class ReportesManager {
                 minimo: 0,
                 maximo: 0,
                 consumo: 0,
-                totalRegistros: 0
+                totalRegistros: 0,
+                volumenPromedio: 0,
+                volumenMinimo: 0,
+                volumenMaximo: 0
             };
         }
         
-        const niveles = datos.map(d => d.level || d.nivel || 0);
+        // Usar "value" de tu DB como nivel
+        const niveles = datos.map(d => d.value || d.level || 0);
+        const volumenes = datos.map(d => d.volumen || 0);
+        
         const promedio = niveles.reduce((a, b) => a + b, 0) / niveles.length;
         const minimo = Math.min(...niveles);
         const maximo = Math.max(...niveles);
         
-        // Calcular consumo estimado (basado en cambios de nivel y capacidad)
         const capacidad = this.configuracion?.cisternaCapacidad || 10000;
         const consumo = ((maximo - minimo) / 100) * capacidad;
+        
+        // Calcular estadísticas de volumen
+        const volumenPromedio = volumenes.reduce((a, b) => a + b, 0) / volumenes.length;
+        const volumenMinimo = Math.min(...volumenes);
+        const volumenMaximo = Math.max(...volumenes);
         
         return {
             promedio: Math.round(promedio * 10) / 10,
             minimo: Math.round(minimo * 10) / 10,
             maximo: Math.round(maximo * 10) / 10,
             consumo: Math.round(consumo),
-            totalRegistros: datos.length
+            totalRegistros: datos.length,
+            volumenPromedio: Math.round(volumenPromedio),
+            volumenMinimo: Math.round(volumenMinimo),
+            volumenMaximo: Math.round(volumenMaximo)
         };
     }
 
-    mostrarResultados(reporte, parametros) {
-        // Mostrar panel de resultados
-        this.reportResults.style.display = 'block';
-        
-        // Actualizar título y rango de fechas
-        this.reportTitleElement.textContent = `Reporte ${this.getNombreReporte(parametros.tipo)}`;
-        this.reportDateRangeElement.textContent = this.formatearRangoFechas(parametros);
-        
-        // Actualizar estadísticas
-        const stats = reporte.estadisticas;
-        this.avgLevelElement.textContent = `${stats.promedio}%`;
-        this.minLevelElement.textContent = `${stats.minimo}%`;
-        this.maxLevelElement.textContent = `${stats.maximo}%`;
-        this.consumptionElement.textContent = `${stats.consumo.toLocaleString()} L`;
-        
-        // Actualizar tabla
-        this.actualizarTablaDatos(reporte.datos);
-        
-        // Generar gráfico
-        this.generarGrafico(reporte.datos, parametros);
-    }
-
-    formatearRangoFechas(parametros) {
-        const opcionesFecha = { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
-        };
-        
-        switch(parametros.tipo) {
-            case 'daily':
-                const fecha = new Date(parametros.fecha);
-                return fecha.toLocaleDateString('es-MX', opcionesFecha);
-                
-            case 'weekly':
-                // Parsear año-semana (formato YYYY-Www)
-                const [year, week] = parametros.semana.split('-W');
-                const fechaInicioSemana = new Date(year, 0, 1 + (week - 1) * 7);
-                const fechaFinSemana = new Date(fechaInicioSemana);
-                fechaFinSemana.setDate(fechaFinSemana.getDate() + 6);
-                
-                return `${fechaInicioSemana.toLocaleDateString('es-MX', {day: 'numeric', month: 'short'})} - 
-                        ${fechaFinSemana.toLocaleDateString('es-MX', opcionesFecha)}`;
-                        
-            case 'monthly':
-                const [yearMonth, month] = parametros.mes.split('-');
-                const fechaMes = new Date(yearMonth, month - 1);
-                return fechaMes.toLocaleDateString('es-MX', { year: 'numeric', month: 'long' });
-                
-            case 'custom':
-                const inicio = new Date(parametros.inicio);
-                const fin = new Date(parametros.fin);
-                return `${inicio.toLocaleDateString('es-MX', opcionesFecha)} - 
-                        ${fin.toLocaleDateString('es-MX', opcionesFecha)}`;
-        }
-        
-        return 'Fecha no especificada';
-    }
-
-    actualizarTablaDatos(datos) {
-        if (!datos || datos.length === 0) {
-            this.reportTableBody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center">No hay datos disponibles para el período seleccionado</td>
-                </tr>
-            `;
+    // ========== VISTA PREVIA ==========
+    mostrarVistaPrevia() {
+        if (!this.reportPreview || !this.reportPaper || !this.currentReportData) {
             return;
         }
         
-        let tablaHTML = '';
+        this.reportConfig.style.display = 'none';
+        this.reportPreview.style.display = 'block';
         
-        datos.forEach((registro, index) => {
-            const fecha = new Date(registro.timestamp || registro.fecha);
-            const hora = fecha.toLocaleTimeString('es-MX', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-            
-            const nivel = registro.level || registro.nivel || 0;
-            const capacidad = this.configuracion?.cisternaCapacidad || 10000;
-            const volumen = Math.round((nivel / 100) * capacidad);
-            
-            let estado = 'Normal';
-            let estadoClass = 'status-normal';
-            
-            if (nivel <= 15) {
-                estado = 'Crítico';
-                estadoClass = 'status-critical';
-            } else if (nivel <= 30) {
-                estado = 'Bajo';
-                estadoClass = 'status-low';
-            } else if (nivel >= 95) {
-                estado = 'Lleno';
-                estadoClass = 'status-full';
+        // Siempre usar plantilla básica
+        const contenidoHTML = this.generarPlantillaBasica();
+        this.reportPaper.innerHTML = contenidoHTML;
+    }
+
+    generarPlantillaBasica() {
+        const { estadisticas, datos, parametros } = this.currentReportData;
+        const config = this.configuracion;
+        const fechaGen = new Date().toLocaleString('es-MX');
+        const capacidad = config?.cisternaCapacidad || 10000;
+        
+        // Obtener el nombre CORRECTO del reporte
+        const nombreReporte = this.getNombreReporte(parametros.tipo);
+        const periodo = this.formatearRangoFechas(parametros);
+        
+        // Información del sensor (del primer dato)
+        const sensorInfo = datos && datos.length > 0 ? {
+            sensor: datos[0].sensor || 'No identificado',
+            ubicacion: datos[0].ubicacion || 'No especificada'
+        } : {
+            sensor: 'Sin datos',
+            ubicacion: 'No especificada'
+        };
+        
+        return `
+            <div class="report-content">
+                <div class="report-header">
+                    <h1>Reporte de Monitoreo</h1>
+                    <div class="report-subtitle">${nombreReporte} - TESCHA</div>
+                </div>
+                
+                <div class="report-info">
+                    <div class="info-row">
+                        <span class="info-label">Tipo:</span>
+                        <span class="info-value">${nombreReporte}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Período:</span>
+                        <span class="info-value">${periodo}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Generado:</span>
+                        <span class="info-value">${fechaGen}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Usuario:</span>
+                        <span class="info-value">${localStorage.getItem('userName') || 'Sistema'}</span>
+                    </div>
+                </div>
+                
+                <div class="report-section">
+                    <h2>Información del Sistema</h2>
+                    <div class="sistema-info">
+                        <div class="info-item">
+                            <span>Sensor:</span>
+                            <strong>${sensorInfo.sensor}</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Ubicación:</span>
+                            <strong>${sensorInfo.ubicacion}</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Capacidad:</span>
+                            <strong>${capacidad.toLocaleString()} L</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="report-section">
+                    <h2>Resumen de Datos</h2>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-value">${estadisticas.promedio}%</div>
+                            <div class="stat-label">Nivel Promedio</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${estadisticas.minimo}%</div>
+                            <div class="stat-label">Nivel Mínimo</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${estadisticas.maximo}%</div>
+                            <div class="stat-label">Nivel Máximo</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${estadisticas.consumo.toLocaleString()} L</div>
+                            <div class="stat-label">Consumo</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-details">
+                        <div class="detail-item">
+                            <span>Registros analizados:</span>
+                            <strong>${estadisticas.totalRegistros}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Volumen promedio:</span>
+                            <strong>${estadisticas.volumenPromedio.toLocaleString()} L</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="report-section">
+                    <h2>Estado del Sistema</h2>
+                    <div class="status-summary">
+                        ${this.generarResumenEstado(estadisticas)}
+                    </div>
+                </div>
+                
+                <div class="report-footer">
+                    <p>Sistema de Monitoreo TESCHA - Documento generado automáticamente</p>
+                </div>
+            </div>
+        `;
+    }
+
+    // ========== FUNCIONES AUXILIARES ==========
+    getNombreReporte(tipo) {
+        const nombres = {
+            'daily': 'Diario',
+            'weekly': 'Semanal', 
+            'monthly': 'Mensual',
+            'custom': 'Personalizado'
+        };
+        return nombres[tipo] || 'General';
+    }
+
+    formatearRangoFechas(parametros) {
+        if (!parametros || !parametros.tipo) return 'Fecha no especificada';
+        
+        try {
+            switch(parametros.tipo) {
+                case 'daily':
+                    if (!parametros.fecha) return 'Fecha no especificada';
+                    const fecha = new Date(parametros.fecha);
+                    return fecha.toLocaleDateString('es-MX', { 
+                        weekday: 'long',
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+                    
+                case 'weekly':
+                    if (!parametros.semana) return 'Semana no especificada';
+                    const [year, week] = parametros.semana.split('-W');
+                    const fechaInicio = new Date(year, 0, 1 + (week - 1) * 7);
+                    const fechaFin = new Date(fechaInicio);
+                    fechaFin.setDate(fechaFin.getDate() + 6);
+                    return `Semana del ${fechaInicio.getDate()} al ${fechaFin.getDate()} de ${fechaInicio.toLocaleDateString('es-MX', {month: 'long'})} ${year}`;
+                    
+                case 'monthly':
+                    if (!parametros.mes) return 'Mes no especificado';
+                    const [y, m] = parametros.mes.split('-');
+                    const fechaMes = new Date(y, m - 1);
+                    return fechaMes.toLocaleDateString('es-MX', { year: 'numeric', month: 'long' });
+                    
+                case 'custom':
+                    if (!parametros.inicio || !parametros.fin) return 'Rango no especificado';
+                    const inicio = new Date(parametros.inicio);
+                    const fin = new Date(parametros.fin);
+                    return `Del ${inicio.toLocaleDateString('es-MX')} al ${fin.toLocaleDateString('es-MX')}`;
+                    
+                default:
+                    return new Date().toLocaleDateString('es-MX');
             }
-            
-            const temperatura = registro.temperature || registro.temperatura || '--';
-            
-            tablaHTML += `
-                <tr>
-                    <td>${hora}</td>
-                    <td>${nivel.toFixed(1)}%</td>
-                    <td>${volumen.toLocaleString()} L</td>
-                    <td><span class="status-badge ${estadoClass}">${estado}</span></td>
-                    <td>${temperatura}°C</td>
-                </tr>
+        } catch (e) {
+            return new Date().toLocaleDateString('es-MX');
+        }
+    }
+
+    generarResumenEstado(estadisticas) {
+        if (estadisticas.minimo <= 15) {
+            return `
+                <div class="status-critical">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>ATENCIÓN:</strong> Nivel crítico detectado (mínimo: ${estadisticas.minimo}%)
+                </div>
             `;
-        });
-        
-        this.reportTableBody.innerHTML = tablaHTML;
+        } else if (estadisticas.minimo <= 30) {
+            return `
+                <div class="status-warning">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>ALERTA:</strong> Nivel bajo (mínimo: ${estadisticas.minimo}%)
+                </div>
+            `;
+        } else {
+            return `
+                <div class="status-normal">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>NORMAL:</strong> Sistema operando correctamente
+                </div>
+            `;
+        }
     }
 
-    generarGrafico(datos, parametros) {
-        // Ocultar placeholder, mostrar canvas
-        document.getElementById('chartPlaceholder').style.display = 'none';
-        this.chartCanvas.style.display = 'block';
-        
-        // Destruir gráfico anterior si existe
-        if (this.chart) {
-            this.chart.destroy();
-        }
-        
-        // Preparar datos para el gráfico
-        const etiquetas = datos.map(d => {
-            const fecha = new Date(d.timestamp || d.fecha);
-            return fecha.toLocaleTimeString('es-MX', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-        });
-        
-        const niveles = datos.map(d => d.level || d.nivel || 0);
-        
-        // Determinar tipo de gráfico
-        let tipoGrafico = 'line';
-        if (parametros.tipo === 'weekly' && parametros.grafico) {
-            tipoGrafico = parametros.grafico;
-        }
-        
-        // Crear nuevo gráfico
-        const ctx = this.chartCanvas.getContext('2d');
-        this.chart = new Chart(ctx, {
-            type: tipoGrafico,
-            data: {
-                labels: etiquetas,
-                datasets: [{
-                    label: 'Nivel de Agua (%)',
-                    data: niveles,
-                    borderColor: '#36a2eb',
-                    backgroundColor: tipoGrafico === 'line' ? 'transparent' : 'rgba(54, 162, 235, 0.2)',
-                    borderWidth: 2,
-                    fill: tipoGrafico === 'area',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    title: {
-                        display: true,
-                        text: `Nivel de Agua - ${this.getNombreReporte(parametros.tipo)}`
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        title: {
-                            display: true,
-                            text: 'Nivel (%)'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Hora del día'
-                        }
-                    }
-                }
+    // Modificar exportarPDF para usar datos reales
+    exportarPDF() {
+        try {
+            this.mostrarMensaje('Generando PDF...', 'info');
+            
+            if (typeof window.jspdf === 'undefined') {
+                throw new Error('jsPDF no está cargado');
             }
-        });
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            let y = 20;
+            
+            // Título con tipo de reporte CORRECTO
+            const nombreReporte = this.currentReportData ? 
+                this.getNombreReporte(this.currentReportData.parametros.tipo) : 'General';
+            
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "bold");
+            doc.text(`REPORTE ${nombreReporte.toUpperCase()}`, 105, y, { align: "center" });
+            y += 10;
+            
+            doc.setFontSize(12);
+            doc.text("Sistema de Cisterna - TESCHA", 105, y, { align: "center" });
+            y += 15;
+            
+            // Información básica
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "normal");
+            const hoy = new Date();
+            
+            // Columna izquierda
+            doc.text(`Fecha: ${hoy.toLocaleDateString('es-MX')}`, 20, y);
+            doc.text(`Hora: ${hoy.toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})}`, 20, y + 6);
+            doc.text(`Usuario: ${localStorage.getItem('userName') || 'Sistema'}`, 20, y + 12);
+            
+            // Columna derecha - PERÍODO CORRECTO
+            if (this.currentReportData?.parametros) {
+                const periodo = this.formatearRangoFechas(this.currentReportData.parametros);
+                doc.text(`Período: ${periodo}`, 150, y, { align: "right" });
+                doc.text(`Tipo: ${nombreReporte}`, 150, y + 6, { align: "right" });
+            }
+            
+            y += 25;
+            
+            // Estadísticas
+            if (this.currentReportData?.estadisticas) {
+                const s = this.currentReportData.estadisticas;
+                
+                doc.setFont(undefined, 'bold');
+                doc.text("RESUMEN DE DATOS", 20, y);
+                y += 10;
+                
+                doc.setFont(undefined, 'normal');
+                const datos = [
+                    `Nivel promedio: ${s.promedio}%`,
+                    `Nivel mínimo: ${s.minimo}%`,
+                    `Nivel máximo: ${s.maximo}%`,
+                    `Consumo estimado: ${s.consumo.toLocaleString()} L`,
+                    `Registros analizados: ${s.totalRegistros}`,
+                    `Volumen promedio: ${s.volumenPromedio.toLocaleString()} L`
+                ];
+                
+                datos.forEach(line => {
+                    doc.text(line, 25, y);
+                    y += 7;
+                });
+            }
+            
+            // Guardar con nombre específico
+            const fechaStr = hoy.toISOString().split('T')[0];
+            const nombreArchivo = `reporte_${nombreReporte.toLowerCase()}_${fechaStr}.pdf`;
+            doc.save(nombreArchivo);
+            
+            this.mostrarMensaje('PDF generado', 'success');
+            
+        } catch (error) {
+            this.mostrarMensaje(`Error: ${error.message}`, 'danger');
+        }
     }
 
+    // ========== ACCIONES DEL REPORTE ==========
     cancelarConfiguracion() {
         this.reportConfig.style.display = 'none';
         this.reportCards.forEach(card => card.classList.remove('selected'));
         this.currentReportType = null;
     }
 
-    nuevoReporte() {
-        this.reportResults.style.display = 'none';
+    editarConfiguracion() {
+        this.reportPreview.style.display = 'none';
+        this.reportConfig.style.display = 'block';
+    }
+
+    cerrarVistaPrevia() {
+        this.reportPreview.style.display = 'none';
+        this.reportConfig.style.display = 'block';
+    }
+
+    finalizarReporte() {
+        this.guardarEnHistorial();
+        this.mostrarMensaje('Reporte guardado', 'success');
+        this.cerrarVistaPrevia();
         this.reportCards.forEach(card => card.classList.remove('selected'));
         this.currentReportType = null;
         this.currentReportData = null;
+    }
+
+    guardarEnHistorial() {
+        if (!this.currentReportData) return;
         
-        if (this.chart) {
-            this.chart.destroy();
-            this.chart = null;
-        }
+        const historial = JSON.parse(localStorage.getItem('reportesHistorial') || '[]');
+        const reporteGuardado = {
+            ...this.currentReportData,
+            id: Date.now().toString(),
+            fechaGuardado: new Date().toISOString(),
+            nombre: `Reporte ${this.getNombreReporte(this.currentReportData.parametros.tipo)}`
+        };
         
-        // Mostrar placeholder del gráfico
-        document.getElementById('chartPlaceholder').style.display = 'flex';
-        this.chartCanvas.style.display = 'none';
+        historial.unshift(reporteGuardado);
+        if (historial.length > 20) historial.pop();
         
-        this.mostrarMensaje('Selecciona un nuevo tipo de reporte', 'info');
+        localStorage.setItem('reportesHistorial', JSON.stringify(historial));
     }
 
     imprimirReporte() {
         window.print();
     }
 
-    exportarPDF() {
-        this.mostrarMensaje('Exportando a PDF... (Funcionalidad en desarrollo)', 'info');
-        // Implementar usando jsPDF o similar
-    }
-    
+    // ========== SISTEMA DE MENSAJES ==========
     mostrarMensaje(mensaje, tipo = 'info') {
-        console.log(`${tipo.toUpperCase()}: ${mensaje}`);
-        
-        // Crear contenedor si no existe
         let contenedor = document.getElementById('messageContainer');
         if (!contenedor) {
             contenedor = this.crearContenedorMensajes();
         }
+        
+        const iconos = {
+            'success': 'fa-check-circle',
+            'warning': 'fa-exclamation-triangle',
+            'danger': 'fa-times-circle',
+            'info': 'fa-info-circle'
+        };
         
         const mensajeDiv = document.createElement('div');
         mensajeDiv.className = `message ${tipo}`;
@@ -727,17 +777,7 @@ class ReportesManager {
             font-size: 0.9em;
         `;
         
-        const iconos = {
-            'success': 'fa-check-circle',
-            'warning': 'fa-exclamation-triangle',
-            'danger': 'fa-times-circle',
-            'info': 'fa-info-circle'
-        };
-        
-        mensajeDiv.innerHTML = `
-            <i class="fas ${iconos[tipo] || 'fa-info-circle'}"></i> ${mensaje}
-        `;
-        
+        mensajeDiv.innerHTML = `<i class="fas ${iconos[tipo] || 'fa-info-circle'}"></i> ${mensaje}`;
         contenedor.appendChild(mensajeDiv);
         
         // Auto-eliminar después de 5 segundos
@@ -767,7 +807,6 @@ class ReportesManager {
         document.body.appendChild(contenedor);
         return contenedor;
     }
-
 }
 
 // Inicializar cuando el DOM esté listo

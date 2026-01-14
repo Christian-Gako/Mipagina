@@ -52,7 +52,7 @@ class ConfiguracionManager {
             }
         });
     }
-    async cargarConfiguracion() {
+    async  cargarConfiguracion() {
         try {
             const response = await fetch('/api/configuracion');
             if (!response.ok) throw new Error('Error del servidor');

@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportes - Monitoreo de Cisterna</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="reportes.css">
+    <link rel="stylesheet" href="print.css" media="print">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
 </head>
 <body>
     <div class="dashboard">
@@ -20,16 +21,16 @@
         <main class="main-content">
             <aside class="sidebar">
                 <nav class="main-nav">
-                    <a href="/dashboard" class="nav-btn">
+                    <a href="/index.html" class="nav-btn">
                         <i class="fas fa-chart-bar"></i> Dashboard
                     </a>
-                    <a href="/reportes" class="nav-btn active">
-                        <i class="fas fa-chart-line"></i> Reportes
+                    <a href="/reportes.html" class="nav-btn active">
+                        <i class="fas fa-file-alt"></i> Reportes
                     </a>
-                    <a href="/historial" class="nav-btn">
+                    <a href="/historial.html" class="nav-btn">
                         <i class="fas fa-history"></i> Historial
                     </a>
-                    <a href="/configuracion" class="nav-btn">
+                    <a href="/configuracion.html" class="nav-btn">
                         <i class="fas fa-cog"></i> Configuración
                     </a>
                 </nav>
@@ -43,7 +44,7 @@
             </aside>
 
             <div class="content-area">
-                   <!-- Panel de selección de reportes -->
+                <!-- Panel de selección de reportes -->
                 <div class="reports-panel">
                     <h2><i class="fas fa-file-alt"></i> Generador de Reportes</h2>
                     
@@ -54,136 +55,131 @@
                             <div class="report-card" data-report="daily">
                                 <div class="report-icon"><i class="fas fa-calendar-day"></i></div>
                                 <h4>Reporte Diario</h4>
+                                <p>Resumen de 24 horas</p>
                             </div>
                             
                             <div class="report-card" data-report="weekly">
                                 <div class="report-icon"><i class="fas fa-calendar-week"></i></div>
                                 <h4>Reporte Semanal</h4>
+                                <p>Análisis de 7 días</p>
                             </div>
                             
                             <div class="report-card" data-report="monthly">
                                 <div class="report-icon"><i class="fas fa-calendar-alt"></i></div>
                                 <h4>Reporte Mensual</h4>
+                                <p>Resumen del mes</p>
                             </div>
                             
                             <div class="report-card" data-report="custom">
                                 <div class="report-icon"><i class="fas fa-sliders-h"></i></div>
                                 <h4>Reporte Personalizado</h4>
+                                <p>Período específico</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Panel de Configuración de Reportes -->
+                    <!-- Panel de Configuración -->
                     <div class="report-configuration card" id="reportConfig" style="display:none;">
                         <h3><i class="fas fa-cog"></i> Configuración del Reporte</h3>
                         <div class="config-filters" id="filtersContainer">
-                            <!-- Filtros dinámicos según tipo de reporte -->
+                            <!-- Filtros dinámicos -->
                         </div>
+                        
+                        <!-- Selección de plantilla -->
+                        <div class="template-selection" id="templateSelection" style="display:none;">
+                            <h4><i class="fas fa-file-contract"></i> Plantilla del Reporte</h4>
+                            <div class="template-cards">
+                                <div class="template-card selected" data-template="standard">
+                                    <div class="template-preview">
+                                        <div class="template-header-preview"></div>
+                                        <div class="template-body-preview"></div>
+                                        <div class="template-footer-preview"></div>
+                                    </div>
+                                    <h5>Estándar</h5>
+                                    <p>Formato básico</p>
+                                </div>
+                                <div class="template-card" data-template="detailed">
+                                    <div class="template-preview">
+                                        <div class="template-header-preview detailed"></div>
+                                        <div class="template-body-preview detailed"></div>
+                                        <div class="template-footer-preview"></div>
+                                    </div>
+                                    <h5>Detallado</h5>
+                                    <p>Con análisis completo</p>
+                                </div>
+                                <div class="template-card" data-template="executive">
+                                    <div class="template-preview">
+                                        <div class="template-header-preview executive"></div>
+                                        <div class="template-body-preview executive"></div>
+                                        <div class="template-footer-preview"></div>
+                                    </div>
+                                    <h5>Ejecutivo</h5>
+                                    <p>Resumen gerencial</p>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="config-actions">
-                            <button class="btn btn-primary" id="generateReport">
+                            <button class="btn btn-primary" id="previewReport">
+                                <i class="fas fa-eye"></i> Vista Previa
+                            </button>
+                            <button class="btn btn-secondary" id="generateReport">
                                 <i class="fas fa-play"></i> Generar Reporte
                             </button>
-                            <button class="btn btn-secondary" id="cancelConfig">
+                            <button class="btn btn-outline" id="cancelConfig">
                                 <i class="fas fa-times"></i> Cancelar
                             </button>
                         </div>
                     </div>
 
-                    <!-- Resultados del Reporte -->
-                    <div class="report-results card" id="reportResults" style="display: none;">
-                        <div class="report-header">
-                            <h3><i class="fas fa-chart-bar"></i> Resultados del Reporte</h3>
-                            <div class="report-meta">
-                                <span id="reportTitle">Reporte Diario</span>
-                                <span id="reportDateRange">15 Dic 2024</span>
+                    <!-- Vista previa del reporte -->
+                    <div class="report-preview-container" id="reportPreview" style="display: none;">
+                        <div class="preview-controls">
+                            <h3><i class="fas fa-search"></i> Vista Previa del Reporte</h3>
+                            <div class="preview-actions">
+                                <button class="btn btn-sm btn-outline" id="editConfig">
+                                    <i class="fas fa-edit"></i> Modificar Configuración
+                                </button>
+                                <button class="btn btn-sm btn-info" id="printPreview">
+                                    <i class="fas fa-print"></i> Vista de Impresión
+                                </button>
+                                <button class="btn btn-sm btn-success" id="downloadPDF">
+                                    <i class="fas fa-file-pdf"></i> Descargar PDF
+                                </button>
                             </div>
                         </div>
                         
-                        <!-- Estadísticas principales -->
-                        <div class="report-stats">
-                            <div class="stat-card primary">
-                                <div class="stat-icon"><i class="fas fa-tint"></i></div>
-                                <div class="stat-value" id="avgLevel">--%</div>
-                                <div class="stat-label">Nivel Promedio</div>
-                            </div>
-                            <div class="stat-card warning">
-                                <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
-                                <div class="stat-value" id="minLevel">--%</div>
-                                <div class="stat-label">Nivel Mínimo</div>
-                            </div>
-                            <div class="stat-card success">
-                                <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
-                                <div class="stat-value" id="maxLevel">--%</div>
-                                <div class="stat-label">Nivel Máximo</div>
-                            </div>
-                            <div class="stat-card info">
-                                <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
-                                <div class="stat-value" id="consumption">-- L</div>
-                                <div class="stat-label">Consumo Estimado</div>
+                        <div class="preview-wrapper">
+                            <div class="report-paper" id="reportPaper">
+                                <!-- El reporte se generará aquí -->
                             </div>
                         </div>
                         
-                        <!-- Gráfico (placeholder) -->
-                        <div class="report-chart-container">
-                            <div class="chart-placeholder" id="chartPlaceholder">
-                                <i class="fas fa-chart-area"></i>
-                                <p>El gráfico se generará aquí</p>
-                            </div>
-                            <canvas id="reportChart" style="display: none;"></canvas>
-                        </div>
-                        
-                        <!-- Tabla de datos -->
-                        <div class="report-table-container">
-                            <h4><i class="fas fa-table"></i> Datos Detallados</h4>
-                            <div class="table-responsive">
-                                <table class="data-table" id="reportTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Hora</th>
-                                            <th>Nivel (%)</th>
-                                            <th>Volumen (L)</th>
-                                            <th>Estado</th>
-                                            <th>Temperatura</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="reportTableBody">
-                                        <!-- Datos dinámicos -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        
-                        <!-- Acciones del reporte -->
-                        <div class="report-actions">
-                            <button class="btn btn-info" id="printReport">
-                                <i class="fas fa-print"></i> Imprimir Reporte
+                        <div class="preview-footer">
+                            <button class="btn btn-primary" id="finalizeReport">
+                                <i class="fas fa-check"></i> Finalizar
                             </button>
-                            <button class="btn btn-success" id="exportPDF">
-                                <i class="fas fa-file-pdf"></i> Exportar PDF
-                            </button>
-                            <button class="btn btn-primary" id="newReport">
-                                <i class="fas fa-plus"></i> Nuevo Reporte
+                            <button class="btn btn-secondary" id="closePreview">
+                                <i class="fas fa-times"></i> Cerrar Vista Previa
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
-        <footer class="footer">
-                <p class="university"><i class="fas fa-graduation-cap"></i> Tecnológico de Estudios Superiores de Chalco</p>
-                <p>Sistema de Monitoreo v0.4</p>
-            </footer>
         
+        <footer class="footer">
+            <p class="university"><i class="fas fa-graduation-cap"></i> Tecnológico de Estudios Superiores de Chalco</p>
+            <p>Sistema de Monitoreo v1.0</p>
+        </footer>
     </div>
     
-    <!-- Librerías necesarias -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
-    
-    <!-- Scripts de la aplicación -->
+    <!-- Scripts -->
     <script src="/js/auth-middleware.js"></script>
     <script src="/js/script.js"></script>
+    
+    <!-- jsPDF local (sin internet) -->
+    <script src="/js/vendor/jspdf.umd.min.js"></script>
     <script src="/js/reportes.js"></script>
 </body>
 </html>
